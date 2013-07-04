@@ -118,6 +118,10 @@
        (t (setq unread-command-events (append unread-command-events
                           (list evt))))))))
 
+(defun open-emacs-init-file()
+  (interactive)
+  (find-file (expand-file-name "init.el" user-emacs-directory)))
+
 ;; Keys
 (define-key evil-insert-state-map "k" #'cofi/maybe-exit)
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
@@ -128,9 +132,8 @@
 (define-key evil-normal-state-map ",f" 'find-file)
 (define-key evil-normal-state-map ",b" 'switch-to-buffer)
 (define-key evil-normal-state-map ",B" 'ibuffer)
-(define-key evil-normal-state-map ",I" ((lambda()
-                                          (interactive)
-                                          (find-file (expand-file-name "init.el" user-emacs-directory)))))
+                                          
+(global-set-key (kbd "<f1>") 'open-emacs-init-file)
 
 ;;; esc quits
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
