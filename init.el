@@ -11,6 +11,10 @@
   (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
   )
 
+;; Recompile lisp files when changed
+(require 'auto-compile)
+(auto-compile-on-save-mode 1)
+
 ;; Don't save any backup files in the current directory
 (setq backup-directory-alist `(("." . "~/.emacs_backups")))
 
@@ -42,13 +46,16 @@
 ;; Another option could be: http://www.emacswiki.org/emacs/linum-off.el
 (add-hook 'find-file-hook (lambda () (linum-mode 1)))
 ;; Format line numbers
-(setq linum-format "%4d \u2502 ")
+(setq linum-format "%4d ")
 
 ;; Disabling the fringe
 (fringe-mode 0)
 
 ;; Disabling the toolbar
 (tool-bar-mode 0)
+
+;; Font
+(set-face-attribute 'default nil :height 130)
 
 ;; IBuffer
 (setq ibuffer-formats
@@ -90,10 +97,10 @@
 
 ;; Evil
 (require 'evil)
-(evil-mode 1)
-(define-key evil-insert-state-map "k" #'cofi/maybe-exit)
 (setq evil-shift-width 2)
+(setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
+(evil-mode 1)
  
 (evil-define-command cofi/maybe-exit ()
   :repeat change
@@ -112,13 +119,18 @@
                           (list evt))))))))
 
 ;; Keys
+(define-key evil-insert-state-map "k" #'cofi/maybe-exit)
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
 (define-key evil-normal-state-map ",a" 'ack-and-a-half)
 (define-key evil-normal-state-map ",g" 'magit-status)
-(define-key evil-normal-state-map "-" 'delete-other-windows)
 (define-key evil-normal-state-map ",d" 'dired-jump)
 (define-key evil-normal-state-map ",," 'evil-buffer)
-(define-key evil-normal-state-map ",b" 'ido-switch-buffer)
+(define-key evil-normal-state-map ",f" 'find-file)
+(define-key evil-normal-state-map ",b" 'switch-to-buffer)
+(define-key evil-normal-state-map ",B" 'ibuffer)
+(define-key evil-normal-state-map ",I" ((lambda()
+                                          (interactive)
+                                          (find-file (expand-file-name "init.el" user-emacs-directory)))))
 
 ;;; esc quits
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
