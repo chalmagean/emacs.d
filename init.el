@@ -80,6 +80,17 @@
                (lambda (arg) (ruby-end-of-block)) nil))
 (add-hook 'ruby-mode-hook
           (lambda ()
+            ;; RVM
+            (require 'rvm)
+            (rvm-use-default)
+            
+            ;; Cucumber
+            (require 'feature-mode)
+            (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+
+            ;; Rspec
+            (require 'rspec-mode)
+
             (hs-minor-mode 1) ;; Enables folding
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
@@ -119,6 +130,7 @@
                           (list evt))))))))
 
 (defun open-emacs-init-file()
+  "Opens the init.el file"
   (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
 
@@ -143,3 +155,15 @@
 (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes (quote ("f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
