@@ -80,24 +80,25 @@
                (lambda (arg) (ruby-end-of-block)) nil))
 (add-hook 'ruby-mode-hook
           (lambda ()
-            ;; RVM
-            (require 'rvm)
-            (rvm-use-default)
-            
-            ;; Cucumber
-            (require 'feature-mode)
-            (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
-            (setq feature-use-rvm t)
-            (setq feature-cucumber-command "cucumber {options} {feature}")
-
-            ;; Rspec
-            (require 'rspec-mode)
-
             (hs-minor-mode 1) ;; Enables folding
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 ;; Bind YARI to C-h R
 (define-key 'help-command "R" 'yari)
+
+;; RVM
+(require 'rvm)
+(rvm-use-default)
+
+;; Cucumber
+(require 'feature-mode)
+(setq feature-use-rvm t)
+(setq feature-cucumber-command "cucumber {options} {feature}")
+(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+
+;; Rspec
+(require 'rspec-mode)
+
 
 ;; Undo tree
 (require 'undo-tree)
@@ -162,7 +163,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" default))))
+ '(custom-safe-themes (quote ("9bac44c2b4dfbb723906b8c491ec06801feb57aa60448d047dbfdbd1a8650897" "f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" default))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
