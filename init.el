@@ -87,6 +87,8 @@
             ;; Cucumber
             (require 'feature-mode)
             (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+            (setq feature-use-rvm t)
+            (setq feature-cucumber-command "cucumber {options} {feature}")
 
             ;; Rspec
             (require 'rspec-mode)
