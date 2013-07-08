@@ -1,3 +1,4 @@
 *.elc
 elpa/
 .places
+/.DS_Store
