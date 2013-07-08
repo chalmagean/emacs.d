@@ -94,6 +94,8 @@
 
 ;; Ruby
 ;; Folding
+(setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
+(require 'ruby-mode)
 (add-to-list 'hs-special-modes-alist
              '(ruby-mode
                "\\(class\\|def\\|do\\|if\\)" "\\(end\\)" "#"
