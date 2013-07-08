@@ -131,8 +131,30 @@
        (t (setq unread-command-events (append unread-command-events
                           (list evt))))))))
 
+; BS-menu
+(eval-after-load 'bs
+  '(progn
+     ;; use the standard bs bindings as a base
+     (evil-make-overriding-map bs-mode-map 'normal t)
+     (evil-define-key 'motion bs-mode-map "h" 'evil-backward-char)
+     (evil-define-key 'motion bs-mode-map "j" 'bs-down)
+     (evil-define-key 'motion bs-mode-map "k" 'bs-up)
+     (evil-define-key 'motion bs-mode-map "l" 'evil-forward-char)
+     ))
 
-;; Keys
+;; Make HJKL keys work in special buffers
+(evil-add-hjkl-bindings magit-branch-manager-mode-map 'emacs
+  "K" 'magit-discard-item
+  "L" 'magit-key-mode-popup-logging)
+(evil-add-hjkl-bindings magit-status-mode-map 'emacs
+  "K" 'magit-discard-item
+  "l" 'magit-key-mode-popup-logging
+  "h" 'magit-toggle-diff-refine-hunk)
+(evil-add-hjkl-bindings magit-log-mode-map 'emacs)
+(evil-add-hjkl-bindings magit-commit-mode-map 'emacs)
+(evil-add-hjkl-bindings occur-mode 'emacs)
+
+;; Evil Keys
 (define-key evil-insert-state-map "k" #'cofi/maybe-exit)
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
 (define-key evil-normal-state-map ",a" 'ack-and-a-half)
@@ -140,17 +162,8 @@
 (define-key evil-normal-state-map ",d" 'dired-jump)
 (define-key evil-normal-state-map ",," 'evil-buffer)
 (define-key evil-normal-state-map ",f" 'find-file)
-(define-key evil-normal-state-map ",b" 'switch-to-buffer)
-(define-key evil-normal-state-map ",B" 'ibuffer)
-
-;;; esc quits
-(define-key evil-normal-state-map [escape] 'keyboard-quit)
-(define-key evil-visual-state-map [escape] 'keyboard-quit)
-(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
-(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(define-key evil-normal-state-map ",b" 'bs-show)
+(define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
 
 ;; RVM
 (require 'rvm)
@@ -185,10 +198,18 @@
                                           
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
 (global-set-key (kbd "C-c a") 'ack-and-a-half)
-(global-set-key (kbd "C-c b") 'switch-to-buffer)
-(global-set-key (kbd "C-c B") 'ibuffer)
+(global-set-key (kbd "C-c b") 'bs-show)
 (global-set-key (kbd "C-c d") 'dired-jump)
 (global-set-key (kbd "C-c g") 'magit-status)
+
+;;; esc quits
+(define-key evil-normal-state-map [escape] 'keyboard-quit)
+(define-key evil-visual-state-map [escape] 'keyboard-quit)
+(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
