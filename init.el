@@ -132,15 +132,14 @@
                           (list evt))))))))
 
 ; BS-menu
-(eval-after-load 'bs
-  '(progn
-     ;; use the standard bs bindings as a base
-     (evil-make-overriding-map bs-mode-map 'normal t)
-     (evil-define-key 'motion bs-mode-map "h" 'evil-backward-char)
-     (evil-define-key 'motion bs-mode-map "j" 'bs-down)
-     (evil-define-key 'motion bs-mode-map "k" 'bs-up)
-     (evil-define-key 'motion bs-mode-map "l" 'evil-forward-char)
-     ))
+(defadvice bs-mode (after bs-mode-override-keybindings activate)
+  ;; use the standard bs bindings as a base
+  (evil-make-overriding-map bs-mode-map 'normal t)
+  (evil-define-key 'normal bs-mode-map "h" 'evil-backward-char)
+  (evil-define-key 'normal bs-mode-map "j" 'bs-down)
+  (evil-define-key 'normal bs-mode-map "k" 'bs-up)
+  (evil-define-key 'normal bs-mode-map "l" 'evil-forward-char)
+  (evil-define-key 'normal bs-mode-map "RET" 'bs-select))
 
 ;; Make HJKL keys work in special buffers
 (evil-add-hjkl-bindings magit-branch-manager-mode-map 'emacs
