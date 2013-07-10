@@ -5,6 +5,9 @@
 (set-face-foreground 'diff-added "#00cc33")
 (set-face-foreground 'diff-removed "#ff0000")
 
+;; Enable a right limit of 70 chars for git logs
+(add-hook 'magit-log-edit-mode-hook 'turn-on-auto-fill)
+
 ;; full screen magit-status
 (defadvice magit-status (around magit-fullscreen activate)
   (window-configuration-to-register :magit-fullscreen)

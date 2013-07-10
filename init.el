@@ -4,15 +4,71 @@
 ;; Adding folders to the load path
 (add-to-list 'load-path "~/.emacs.d/")
 
-;; Custom themes
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-
 ;; Using MELPA for packages
 (when (>= emacs-major-version 24)
   (require 'package)
   (package-initialize)
   (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
   )
+
+;; Load necessary packages
+(package-initialize)
+(setq my-required-packages
+      (list 'magit
+            'ack-and-a-half
+            'enh-ruby-mode
+            'dired-details
+            'yasnippet
+            'evil
+            'rvm
+            'yaml-mode
+            'markdown-mode
+            'gist
+            'rspec-mode
+            'undo-tree
+            'inf-ruby
+            'fiplr))
+
+(dolist (package my-required-packages)
+  (when (not (package-installed-p package))
+    (package-refresh-contents)
+    (package-install package)))
+
+;; Custom themes
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+
+;; Prevent adding the coding line
+(setq ruby-insert-encoding-magic-comment nil)
+
+;; Always open split windows horizontally
+(setq split-height-threshold 0)
+(setq split-width-threshold nil)
+
+;; Yaml
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+
+;; Always ident with 2 spaces
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq-default c-basic-offset 2)
+(setq css-indent-offset 2)
+(setq js-indent-level 2)
+
+;; Use the short version for yes/no
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; Confirm quit
+(setq confirm-kill-emacs 'yes-or-no-p)
+
+;; Always refresh file contents if they change on disk
+(global-auto-revert-mode 1)
+
+;; Diable bold and underline faces
+(mapc
+ (lambda (face)
+   (set-face-attribute face nil :weight 'normal :underline nil))
+ (face-list))
 
 ;; Recompile lisp files when changed
 (require 'auto-compile)
@@ -38,10 +94,6 @@
 ;; Don't save any backup files in the current directory
 (setq backup-directory-alist `(("." . "~/.emacs_backups")))
 
-;; Don't use tabs to indent
-(setq-default indent-tabs-mode nil)
-;; Default tabs should be 2 spaces
-(setq-default tab-width 2)
 
 ;; Highlight parenthesis
 (show-paren-mode 1)
@@ -101,11 +153,6 @@
 (setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
                             (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS"))))
 
-;; Css indentation
-(setq css-indent-offset 2)
-
-;; Ruby
-(setq ruby-indent-level 2)
 
 ;; Folding
 (setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
