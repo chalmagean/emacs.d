@@ -96,6 +96,11 @@
   uniquify-buffer-name-style 'post-forward
   uniquify-separator " : ")
 
+;; Fiplr
+(setq fiplr-root-markers '(".git" ".svn"))
+(setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
+                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS"))))
+
 ;; Css indentation
 (setq css-indent-offset 2)
 
@@ -171,31 +176,11 @@
 (define-key evil-normal-state-map ",d" 'dired-jump)
 (define-key evil-normal-state-map ",," 'evil-buffer)
 (define-key evil-normal-state-map ",f" 'find-file)
+(define-key evil-normal-state-map ",F" 'fiplr-find-file)
 (define-key evil-normal-state-map ",b" 'bs-show)
+(define-key evil-normal-state-map ",x" 'execute-extended-command)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
 (define-key evil-normal-state-map ",R" 'rspec-verify-single)
-
-(evil-ex-define-cmd "Rfile"       'rinari-find-file-in-project)
-(evil-ex-define-cmd "Rf"          'rinari-find-file-in-project)
-(evil-ex-define-cmd "Rcontroller" 'rinari-find-controller)
-(evil-ex-define-cmd "Rc"          'rinari-find-controller)
-(evil-ex-define-cmd "Rmodel"      'rinari-find-model)
-(evil-ex-define-cmd "Rm"          'rinari-find-model)
-(evil-ex-define-cmd "Rview"       'rinari-find-view)
-(evil-ex-define-cmd "Rv"          'rinari-find-view)
-(evil-ex-define-cmd "Rspec"       'rinari-find-rspec)
-(evil-ex-define-cmd "Rs"          'rinari-find-rspec)
-(evil-ex-define-cmd "Rhelper"     'rinari-find-helper)
-(evil-ex-define-cmd "Rh"        'rinari-find-helper)
-(evil-ex-define-cmd "Rmailer"     'rinari-find-mailer)
-(evil-ex-define-cmd "Rmigration"  'rinari-find-migration)
-(evil-ex-define-cmd "Rm"     'rinari-find-migration)
-(evil-ex-define-cmd "Rstylesheet" 'rinari-find-stylesheet)
-(evil-ex-define-cmd "Rsass"       'rinari-find-sass)
-(evil-ex-define-cmd "Rjavascript" 'rinari-find-javascript)
-(evil-ex-define-cmd "Rj"    'rinari-find-javascript)
-(evil-ex-define-cmd "Rfeature"    'rinari-find-festures)
-(evil-ex-define-cmd "Rf"       'rinari-find-festures)
 
 ;; RVM
 (require 'rvm)
@@ -209,10 +194,6 @@
 
 ;; Rspec
 (require 'rspec-mode)
-
-;; Rinari
-(require 'rinari)
-(global-rinari-mode)
 
 ;; Undo tree
 (require 'undo-tree)
