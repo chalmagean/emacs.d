@@ -176,18 +176,26 @@
 (define-key evil-normal-state-map ",R" 'rspec-verify-single)
 
 (evil-ex-define-cmd "Rfile"       'rinari-find-file-in-project)
+(evil-ex-define-cmd "Rf"          'rinari-find-file-in-project)
 (evil-ex-define-cmd "Rcontroller" 'rinari-find-controller)
+(evil-ex-define-cmd "Rc"          'rinari-find-controller)
 (evil-ex-define-cmd "Rmodel"      'rinari-find-model)
+(evil-ex-define-cmd "Rm"          'rinari-find-model)
 (evil-ex-define-cmd "Rview"       'rinari-find-view)
+(evil-ex-define-cmd "Rv"          'rinari-find-view)
 (evil-ex-define-cmd "Rspec"       'rinari-find-rspec)
+(evil-ex-define-cmd "Rs"          'rinari-find-rspec)
 (evil-ex-define-cmd "Rhelper"     'rinari-find-helper)
+(evil-ex-define-cmd "Rh"        'rinari-find-helper)
 (evil-ex-define-cmd "Rmailer"     'rinari-find-mailer)
 (evil-ex-define-cmd "Rmigration"  'rinari-find-migration)
+(evil-ex-define-cmd "Rm"     'rinari-find-migration)
 (evil-ex-define-cmd "Rstylesheet" 'rinari-find-stylesheet)
 (evil-ex-define-cmd "Rsass"       'rinari-find-sass)
 (evil-ex-define-cmd "Rjavascript" 'rinari-find-javascript)
+(evil-ex-define-cmd "Rj"    'rinari-find-javascript)
 (evil-ex-define-cmd "Rfeature"    'rinari-find-festures)
-(evil-ex-define-cmd "Rserver"     'rinari-web-server-restart)
+(evil-ex-define-cmd "Rf"       'rinari-find-festures)
 
 ;; RVM
 (require 'rvm)
@@ -209,6 +217,24 @@
 ;; Undo tree
 (require 'undo-tree)
 (global-undo-tree-mode 1)
+
+;; Kills live buffers, leaves some emacs work buffers
+;; optained from http://www.chrislott.org/geek/emacs/dotemacs.html
+(defun nuke-all-buffers (&optional list)
+  "For each buffer in LIST, kill it silently if unmodified. Otherwise ask.
+LIST defaults to all existing live buffers."
+  (interactive)
+  (if (null list)
+      (setq list (buffer-list)))
+  (while list
+    (let* ((buffer (car list))
+           (name (buffer-name buffer)))
+      (and (not (string-equal name ""))
+           (not (string-equal name "*Messages*"))
+           (not (string-equal name "*scratch*"))
+           (/= (aref name 0) ? )
+           (kill-buffer buffer)))
+    (setq list (cdr list))))
 
 ;; Ack
 ;; Always prompt for a directory root
@@ -234,6 +260,11 @@
 (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+
+;; Load a personal.el file if it exists
+;; to be able to override stuff in here
+(if (file-exists-p "~/.emacs.d/personal.el")
+    (load "personal"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
