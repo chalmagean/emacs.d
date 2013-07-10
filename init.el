@@ -118,11 +118,11 @@
 (define-key 'help-command "R" 'yari)
 
 ;; Evil
-(require 'evil)
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
 (setq evil-complete-all-buffers nil)
+(require 'evil)
 (evil-mode 1)
  
 (evil-define-command cofi/maybe-exit ()
