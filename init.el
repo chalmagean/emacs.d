@@ -62,6 +62,10 @@
 ;; Choosing a dark theme
 (load-theme 'fogus)
 
+;; Making dabbrev a bit nicer
+(setq dabbrev-abbrev-skip-leading-regexp ":")
+(setq dabbrev-backward-only t)
+
 ;; Show line numbers only in opened files
 ;; Another option could be: http://www.emacswiki.org/emacs/linum-off.el
 (add-hook 'find-file-hook (lambda () (linum-mode 1)))
@@ -92,7 +96,12 @@
   uniquify-buffer-name-style 'post-forward
   uniquify-separator " : ")
 
+;; Css indentation
+(setq css-indent-offset 2)
+
 ;; Ruby
+(setq ruby-indent-level 2)
+
 ;; Folding
 (setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
 (require 'ruby-mode)
@@ -113,6 +122,7 @@
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
+(setq evil-complete-all-buffers nil)
 (evil-mode 1)
  
 (evil-define-command cofi/maybe-exit ()
@@ -163,6 +173,21 @@
 (define-key evil-normal-state-map ",f" 'find-file)
 (define-key evil-normal-state-map ",b" 'bs-show)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
+(define-key evil-normal-state-map ",R" 'rspec-verify-single)
+
+(evil-ex-define-cmd "Rfile"       'rinari-find-file-in-project)
+(evil-ex-define-cmd "Rcontroller" 'rinari-find-controller)
+(evil-ex-define-cmd "Rmodel"      'rinari-find-model)
+(evil-ex-define-cmd "Rview"       'rinari-find-view)
+(evil-ex-define-cmd "Rspec"       'rinari-find-rspec)
+(evil-ex-define-cmd "Rhelper"     'rinari-find-helper)
+(evil-ex-define-cmd "Rmailer"     'rinari-find-mailer)
+(evil-ex-define-cmd "Rmigration"  'rinari-find-migration)
+(evil-ex-define-cmd "Rstylesheet" 'rinari-find-stylesheet)
+(evil-ex-define-cmd "Rsass"       'rinari-find-sass)
+(evil-ex-define-cmd "Rjavascript" 'rinari-find-javascript)
+(evil-ex-define-cmd "Rfeature"    'rinari-find-festures)
+(evil-ex-define-cmd "Rserver"     'rinari-web-server-restart)
 
 ;; RVM
 (require 'rvm)
@@ -216,7 +241,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes (quote ("73abbe794b6467bbf6a9f04867da0befa604a072b38012039e8c1ba730e5f7a5" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "8eaa3bce3c618cd81a318fcf2d28c1cd21278531f028feb53186f6387547dfb4" "9bac44c2b4dfbb723906b8c491ec06801feb57aa60448d047dbfdbd1a8650897" "f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" default)))
- '(debug-on-error t)
  '(feature-cucumber-command "cucumber {options} {feature}")
  '(rspec-use-rake-when-possible nil))
 (custom-set-faces
