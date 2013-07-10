@@ -48,6 +48,11 @@
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
+;; Load custom snippets
+(require 'yasnippet)
+(yas-global-mode 1)
+(setq yas-snippet-dirs "~/.emacs.d/snippets")
+
 ;; Always ident with 2 spaces
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
