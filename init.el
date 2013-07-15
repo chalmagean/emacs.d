@@ -27,6 +27,7 @@
             'rspec-mode
             'undo-tree
             'inf-ruby
+            'flx
             'fiplr))
 
 (dolist (package my-required-packages)
@@ -112,6 +113,8 @@
 (load "~/.emacs.d/my-dired")
 ;; Magit
 (load "~/.emacs.d/my-magit")
+;; IDO
+(load "~/.emacs.d/my-ido")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -203,6 +206,7 @@
   ;; use the standard bs bindings as a base
   (evil-make-overriding-map bs-mode-map 'normal t)
   (evil-define-key 'normal bs-mode-map "h" 'evil-backward-char)
+  (evil-define-key 'normal bs-mode-map "q" 'bs-abort)
   (evil-define-key 'normal bs-mode-map "j" 'bs-down)
   (evil-define-key 'normal bs-mode-map "k" 'bs-up)
   (evil-define-key 'normal bs-mode-map "l" 'evil-forward-char)
@@ -233,6 +237,7 @@
 (define-key evil-normal-state-map ",x" 'execute-extended-command)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
 (define-key evil-normal-state-map ",R" 'rspec-verify-single)
+(define-key evil-normal-state-map ",t" 'rspec-toggle-spec-and-target)
 
 ;; RVM
 (require 'rvm)
@@ -246,6 +251,11 @@
 
 ;; Rspec
 (require 'rspec-mode)
+
+;; Smart mode line
+(require 'smart-mode-line)
+(if after-init-time (sml/setup)
+  (add-hook 'after-init-hook 'sml/setup))
 
 ;; Undo tree
 (require 'undo-tree)
