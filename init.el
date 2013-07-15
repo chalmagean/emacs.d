@@ -17,6 +17,7 @@
       (list 'magit
             'ack-and-a-half
             'enh-ruby-mode
+            'rhtml-mode
             'dired-details
             'yasnippet
             'evil
@@ -173,6 +174,9 @@
           (lambda ()
             (hs-minor-mode 1) ;; Enables folding
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
+
+;; Rhtml mode
+(require 'rhtml-mode)
 
 ;; Bind YARI to C-h R
 (define-key 'help-command "R" 'yari)
