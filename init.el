@@ -120,7 +120,7 @@
 (setq mac-command-modifier 'meta)
 
 ;; Choosing a dark theme
-(load-theme 'fogus)
+(load-theme 'fogus t)
 
 ;; Making dabbrev a bit nicer
 (setq dabbrev-abbrev-skip-leading-regexp ":")
@@ -251,11 +251,7 @@
 
 ;; Rspec
 (require 'rspec-mode)
-
-;; Smart mode line
-(require 'smart-mode-line)
-(if after-init-time (sml/setup)
-  (add-hook 'after-init-hook 'sml/setup))
+(setq rspec-use-rake-when-possible nil)
 
 ;; Undo tree
 (require 'undo-tree)
@@ -314,9 +310,7 @@ LIST defaults to all existing live buffers."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("73abbe794b6467bbf6a9f04867da0befa604a072b38012039e8c1ba730e5f7a5" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "8eaa3bce3c618cd81a318fcf2d28c1cd21278531f028feb53186f6387547dfb4" "9bac44c2b4dfbb723906b8c491ec06801feb57aa60448d047dbfdbd1a8650897" "f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" default)))
- '(feature-cucumber-command "cucumber {options} {feature}")
- '(rspec-use-rake-when-possible nil))
+ )
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
