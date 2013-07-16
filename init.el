@@ -29,6 +29,7 @@
             'undo-tree
             'inf-ruby
             'flx
+            'goto-chg ;; For evil's g;
             'fiplr))
 
 (dolist (package my-required-packages)
@@ -177,11 +178,13 @@
 
 ;; Rhtml mode
 (require 'rhtml-mode)
+(add-to-list 'auto-mode-alist '("\\.html.erb?\\'" . rhtml-mode))
 
 ;; Bind YARI to C-h R
 (define-key 'help-command "R" 'yari)
 
 ;; Evil
+(require 'goto-chg)
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
