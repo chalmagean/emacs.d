@@ -237,9 +237,12 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "C-c a") 'ack-and-a-half)
 (global-set-key (kbd "C-c b") 'bs-show)
 (global-set-key (kbd "C-c j") 'dired-jump)
+(global-set-key (kbd "C-c d") 'duplicate-line)
 (global-set-key (kbd "C-c g") 'magit-status)
 (global-set-key (kbd "C-c k") 'kill-this-buffer)
 (global-set-key (kbd "C-c f") 'fiplr-find-file)
+(global-set-key (kbd "C-c o") 'vi-open-line-below)
+(global-set-key (kbd "C-c O") 'vi-open-line-above)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
