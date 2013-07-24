@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: change_column
+# key: cc
+# --
+change_column :${1:table_name}, :${2:column_name}, :${3:new_type}

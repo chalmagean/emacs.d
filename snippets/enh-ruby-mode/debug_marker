@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: debug marker
+# key: dbgm
+# --
+puts "---------- ${1:text}"$0

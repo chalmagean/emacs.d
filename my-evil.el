@@ -1,4 +1,5 @@
 ;; Evil
+(setq evil-default-cursor t)
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)

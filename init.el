@@ -3,6 +3,7 @@
 
 ;; Adding folders to the load path
 (add-to-list 'load-path "~/.emacs.d/")
+(add-to-list 'load-path "~/.emacs.d/vendor/")
 
 ;; Using MELPA for packages
 (when (>= emacs-major-version 24)
@@ -15,6 +16,8 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
+            'scss-mode
+            'sass-mode
             'ack-and-a-half
             'enh-ruby-mode
             'rhtml-mode
@@ -29,7 +32,7 @@
             'undo-tree
             'inf-ruby
             'flx
-            'goto-chg ;; For evil's g;
+            'goto-chg
             'fiplr))
 
 (dolist (package my-required-packages)
@@ -105,7 +108,6 @@
 ;; Don't save any backup files in the current directory
 (setq backup-directory-alist `(("." . "~/.emacs_backups")))
 
-
 ;; Highlight parenthesis
 (show-paren-mode 1)
 
@@ -120,6 +122,8 @@
 (load "~/.emacs.d/my-magit")
 ;; IDO
 (load "~/.emacs.d/my-ido")
+;; Custom functions
+(load "~/.emacs.d/my-functions")
 ;; Evil
 ;; (load "~/.emacs.d/my-evil")
 
@@ -166,8 +170,7 @@
 ;; Fiplr
 (setq fiplr-root-markers '(".git" ".svn"))
 (setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
-                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS"))))
-
+                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS" "*.ru"))))
 
 ;; Folding
 (setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
@@ -202,32 +205,28 @@
 (require 'rspec-mode)
 (setq rspec-use-rake-when-possible nil)
 
+;; Scss
+(autoload 'scss-mode "scss-mode")
+(add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
+
 ;; Undo tree
 (require 'undo-tree)
 (global-undo-tree-mode 1)
-
-;; Kills live buffers, leaves some emacs work buffers
-;; optained from http://www.chrislott.org/geek/emacs/dotemacs.html
-(defun nuke-all-buffers (&optional list)
-  "For each buffer in LIST, kill it silently if unmodified. Otherwise ask.
-LIST defaults to all existing live buffers."
-  (interactive)
-  (if (null list)
-      (setq list (buffer-list)))
-  (while list
-    (let* ((buffer (car list))
-           (name (buffer-name buffer)))
-      (and (not (string-equal name ""))
-           (not (string-equal name "*Messages*"))
-           (not (string-equal name "*scratch*"))
-           (/= (aref name 0) ? )
-           (kill-buffer buffer)))
-    (setq list (cdr list))))
 
 ;; Ack
 ;; Always prompt for a directory root
 (setq ack-and-a-half-prompt-for-directory t)
 (setq ack-and-a-half-executable "/usr/local/bin/ack")
+
+(defun font-lock-comment-annotations ()
+  "Highlight a bunch of well known comment annotations.
+
+This functions should be added to the hooks of major modes for programming."
+  (font-lock-add-keywords
+   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):"
+          1 font-lock-warning-face t))))
+
+(add-hook 'prog-mode-hook 'font-lock-comment-annotations)
 
 (defun open-emacs-init-file()
   "Opens the init.el file"
@@ -237,8 +236,10 @@ LIST defaults to all existing live buffers."
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
 (global-set-key (kbd "C-c a") 'ack-and-a-half)
 (global-set-key (kbd "C-c b") 'bs-show)
-(global-set-key (kbd "C-c d") 'dired-jump)
+(global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-c k") 'kill-this-buffer)
+(global-set-key (kbd "C-c f") 'fiplr-find-file)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
@@ -250,11 +251,12 @@ LIST defaults to all existing live buffers."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(scss-compile-at-save nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(erb-face ((t nil)))
+ '(erb-out-delim-face ((t (:foreground "#aaffff")))))
 (put 'downcase-region 'disabled nil)
