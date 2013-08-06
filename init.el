@@ -23,7 +23,9 @@
             'rhtml-mode
             'dired-details
             'yasnippet
-            ;; 'evil
+            'ibuffer-vc
+            'evil
+            'surround
             'rvm
             'yaml-mode
             'markdown-mode
@@ -61,6 +63,16 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
+
+;; BS mode
+(setq bs-attributes-list 
+      '(("" 1 1 left bs--get-marked-string)
+        ("M" 1 1 left bs--get-modified-string)
+        ("R" 2 2 left bs--get-readonly-string)
+        ("Buffer" bs--get-name-length 10 left bs--get-name)
+        ("" 1 1 left " ")
+        ("File" 12 12 left bs--get-file-name)
+        ("" 2 2 left "  ")))
 
 ;; Always ident with 2 spaces
 (setq-default indent-tabs-mode nil)
@@ -125,7 +137,7 @@
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
 ;; Evil
-;; (load "~/.emacs.d/my-evil")
+(load "~/.emacs.d/my-evil")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -160,6 +172,11 @@
         (mark " " (name 16 -1) " " filename)))
 
 (setq ibuffer-show-empty-filter-groups nil)
+
+(add-hook 'ibuffer-mode-hook
+          '(lambda ()
+             (ibuffer-auto-mode 1)
+             (ibuffer-vc-set-filter-groups-by-vc-root)))
 
 ;; Uniquify buffers
 (require 'uniquify)
@@ -236,6 +253,7 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
 (global-set-key (kbd "C-c a") 'ack-and-a-half)
 (global-set-key (kbd "C-c b") 'bs-show)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
 (global-set-key (kbd "C-c g") 'magit-status)
@@ -243,6 +261,8 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "C-c f") 'fiplr-find-file)
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
+(global-set-key [(control ?.)] 'goto-last-change)
+(global-set-key [(control ?,)] 'goto-last-change-reverse)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here

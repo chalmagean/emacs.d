@@ -6,7 +6,10 @@
 (setq evil-complete-all-buffers nil)
 (require 'evil)
 (evil-mode 1)
- 
+
+(require 'surround)
+(global-surround-mode 1)
+
 (evil-define-command cofi/maybe-exit ()
   :repeat change
   (interactive)
@@ -51,12 +54,13 @@
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
 (define-key evil-normal-state-map ",a" 'ack-and-a-half)
 (define-key evil-normal-state-map ",g" 'magit-status)
-(define-key evil-normal-state-map ",d" 'dired-jump)
+(define-key evil-normal-state-map ",j" 'dired-jump)
 (define-key evil-normal-state-map ",," 'evil-buffer)
 (define-key evil-normal-state-map ",f" 'find-file)
 (define-key evil-normal-state-map ",F" 'fiplr-find-file)
 (define-key evil-normal-state-map ",b" 'bs-show)
 (define-key evil-normal-state-map ",x" 'execute-extended-command)
+(define-key evil-normal-state-map ",d" 'kill-this-buffer)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
 (define-key evil-normal-state-map ",R" 'rspec-verify-single)
 (define-key evil-normal-state-map ",t" 'rspec-toggle-spec-and-target)

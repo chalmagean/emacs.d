@@ -173,3 +173,8 @@ LIST defaults to all existing live buffers."
   "Moves the point to the newly created window after splitting."
   (other-window 1))
 
+(defun get-current-ticket ()
+  (interactive)
+  (let ((current-branch-name (magit-get-current-branch)))
+    (progn (string-match "\\([0-9]+\\)" current-branch-name)
+           (insert (concat "[#" (match-string 1 current-branch-name) "] ")))))
