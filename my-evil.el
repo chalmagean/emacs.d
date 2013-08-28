@@ -63,6 +63,7 @@
 (define-key evil-normal-state-map ",d" 'kill-this-buffer)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
 (define-key evil-normal-state-map ",R" 'rspec-verify-single)
+(define-key evil-normal-state-map ",r" 'rspec-verify)
 (define-key evil-normal-state-map ",t" 'rspec-toggle-spec-and-target)
 
 ;;; esc quits

@@ -27,6 +27,7 @@
             'evil
             'surround
             'rvm
+            'rinari
             'yaml-mode
             'markdown-mode
             'gist
@@ -65,6 +66,8 @@
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
 
 ;; BS mode
+(setq bs-must-show-regexp "^\\*scratch*")
+(setq bs-dont-show-regexp "TAGS")
 (setq bs-attributes-list 
       '(("" 1 1 left bs--get-marked-string)
         ("M" 1 1 left bs--get-modified-string)
@@ -138,6 +141,10 @@
 (load "~/.emacs.d/my-functions")
 ;; Evil
 (load "~/.emacs.d/my-evil")
+
+;; Powerline
+(require 'powerline)
+(powerline-default-theme)
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -283,3 +290,4 @@ This functions should be added to the hooks of major modes for programming."
  '(erb-face ((t nil)))
  '(erb-out-delim-face ((t (:foreground "#aaffff")))))
 (put 'downcase-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
