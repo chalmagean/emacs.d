@@ -20,16 +20,23 @@
             'sass-mode
             'ack-and-a-half
             'enh-ruby-mode
+            'ruby-tools
+            'window-number
             'rhtml-mode
             'dired-details
             'yasnippet
             'ibuffer-vc
+            'powerline
             'evil
             'surround
+            'enclose
             'rvm
             'rinari
+            'feature-mode
+            'auto-compile
             'yaml-mode
             'markdown-mode
+            'wrap-region
             'gist
             'rspec-mode
             'undo-tree
@@ -42,6 +49,11 @@
   (when (not (package-installed-p package))
     (package-refresh-contents)
     (package-install package)))
+
+;; Window numbers
+(require 'window-number)
+(window-number-mode)
+(window-number-meta-mode)
 
 ;; Go to last change
 (require 'goto-chg)
@@ -208,6 +220,18 @@
             (hs-minor-mode 1) ;; Enables folding
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
+(defun ruby-interpolate ()
+  "In a double quoted string, interpolate."
+  (interactive)
+  (insert "#")
+  (when (and
+         (looking-back "\".*")
+         (looking-at ".*\""))
+    (insert "{}")
+    (backward-char 1)))
+
+;;(define-key enh-ruby-mode-map (kbd "C-c #") 'ruby-interpolate)
+
 ;; Rhtml mode
 (require 'rhtml-mode)
 (add-to-list 'auto-mode-alist '("\\.html.erb?\\'" . rhtml-mode))
@@ -265,9 +289,11 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "C-c d") 'duplicate-line)
 (global-set-key (kbd "C-c g") 'magit-status)
 (global-set-key (kbd "C-c k") 'kill-this-buffer)
+(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
 (global-set-key (kbd "C-c f") 'fiplr-find-file)
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
+(global-set-key (kbd "C-c r") 'rspec-verify-single)
 (global-set-key [(control ?.)] 'goto-last-change)
 (global-set-key [(control ?,)] 'goto-last-change-reverse)
 
@@ -281,6 +307,7 @@ This functions should be added to the hooks of major modes for programming."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes (quote ("b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(scss-compile-at-save nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
