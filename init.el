@@ -28,6 +28,7 @@
             'ibuffer-vc
             'powerline
             'evil
+            'fill-column-indicator
             'surround
             'enclose
             'rvm
@@ -57,6 +58,9 @@
 
 ;; Go to last change
 (require 'goto-chg)
+
+;; Highlight 80 column margin
+(require 'fill-column-indicator)
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
