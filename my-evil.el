@@ -1,4 +1,3 @@
-;; Evil
 (setq evil-default-cursor t)
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
@@ -6,6 +5,14 @@
 (setq evil-complete-all-buffers nil)
 (require 'evil)
 (evil-mode 1)
+
+;; Clear insert state bindings.
+;; (setcdr evil-insert-state-map nil)
+
+;; Set the initial evil state that certain major modes will be in.
+(evil-set-initial-state 'magit-log-edit-mode 'emacs)
+(evil-set-initial-state 'nav-mode 'emacs)
+(evil-set-initial-state 'grep-mode 'emacs)
 
 (require 'surround)
 (global-surround-mode 1)
@@ -25,6 +32,9 @@
     (push 'escape unread-command-events))
        (t (setq unread-command-events (append unread-command-events
                           (list evt))))))))
+
+;; Don't wait for any other keys after escape is pressed.
+(setq evil-esc-delay 0)
 
 ; BS-menu
 (defadvice bs-mode (after bs-mode-override-keybindings activate)
@@ -62,9 +72,18 @@
 (define-key evil-normal-state-map ",x" 'execute-extended-command)
 (define-key evil-normal-state-map ",d" 'kill-this-buffer)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
-(define-key evil-normal-state-map ",R" 'rspec-verify-single)
-(define-key evil-normal-state-map ",r" 'rspec-verify)
-(define-key evil-normal-state-map ",t" 'rspec-toggle-spec-and-target)
+
+;; RSPEC, requires rspec-mode
+(evil-declare-key 'normal ruby-mode-map (kbd ",ss") 'rspec-verify-single)
+(evil-declare-key 'normal ruby-mode-map (kbd ",sv") 'rspec-verify)
+(evil-declare-key 'normal ruby-mode-map (kbd ",sa") 'rspec-verify-all)
+(evil-declare-key 'normal ruby-mode-map (kbd ",st") 'rspec-toggle-example-pendingness)
+(evil-declare-key 'normal ruby-mode-map (kbd ",sg") 'rspec-toggle-spec-and-target)
+(evil-declare-key 'normal rspec-mode-map (kbd ",ss") 'rspec-verify-single)
+(evil-declare-key 'normal rspec-mode-map (kbd ",sv") 'rspec-verify)
+(evil-declare-key 'normal rspec-mode-map (kbd ",sa") 'rspec-verify-all)
+(evil-declare-key 'normal rspec-mode-map (kbd ",st") 'rspec-toggle-example-pendingness)
+(evil-declare-key 'normal rspec-mode-map (kbd ",sg") 'rspec-toggle-spec-and-target)
 
 ;;; esc quits
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
