@@ -1,5 +1,7 @@
-;; Inhibit startup screen
 (setq inhibit-startup-message t)
+
+(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+(setq exec-path (append exec-path '("/usr/local/bin")))
 
 ;; Adding folders to the load path
 (add-to-list 'load-path "~/.emacs.d/")
@@ -16,23 +18,31 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
+            'evil
+            'surround
+            'git-commit-mode
+            'git-rebase-mode
+            'gitconfig-mode
+            'gitignore-mode
             'scss-mode
             'sass-mode
             'ack-and-a-half
             'enh-ruby-mode
+            'robe
             'ruby-tools
+            'highlight-indentation
             'window-number
             'rhtml-mode
             'dired-details
             'yasnippet
             'ibuffer-vc
             'powerline
-            'evil
             'fill-column-indicator
-            'surround
             'enclose
             'rvm
+            'ag
             'rinari
+            'web-mode
             'feature-mode
             'auto-compile
             'yaml-mode
@@ -56,11 +66,29 @@
 (window-number-mode)
 (window-number-meta-mode)
 
+;; Enable copy and pasting from clipboard
+(setq x-select-enable-clipboard t)
+
+;; To get rid of Weird color escape sequences in Emacs.
+;; Instruct Emacs to use emacs term-info not system term info
+;; http://stackoverflow.com/questions/8918910/weird-character-zsh-in-emacs-terminal
+(setq system-uses-terminfo nil)
+
+;; Prefer utf-8 encoding
+(prefer-coding-system 'utf-8)
+
 ;; Go to last change
 (require 'goto-chg)
 
 ;; Highlight 80 column margin
 (require 'fill-column-indicator)
+(setq fci-rule-use-dashes nil)
+(setq fci-always-use-textual-rule nil)
+
+(require 'highlight-indentation)
+
+;; Web mode
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
@@ -149,25 +177,34 @@
 
 ;; Dired
 (load "~/.emacs.d/my-dired")
+
 ;; Magit
 (load "~/.emacs.d/my-magit")
+
 ;; IDO
-(load "~/.emacs.d/my-ido")
+;; (load "~/.emacs.d/my-ido")
+
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
-;; Evil
+
+;; Evil stuff
 (load "~/.emacs.d/my-evil")
 
 ;; Powerline
 (require 'powerline)
-(powerline-default-theme)
+(powerline-center-evil-theme)
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
 
 ;; Choosing a dark theme
-(load-theme 'fogus t)
+;; (load-theme 'base16-default t)
+(load-theme 'tango-dark t)
 
+;; Default frame size
+(setq initial-frame-alist
+      '((top . 150) (left . 300) (width . 120) (height . 55)))
+   
 ;; Making dabbrev a bit nicer
 (setq dabbrev-abbrev-skip-leading-regexp ":")
 (setq dabbrev-backward-only t)
@@ -185,7 +222,8 @@
 (tool-bar-mode 0)
 
 ;; Font
-(set-face-attribute 'default nil :height 130)
+(set-frame-font "Menlo-14")
+;;(set-face-attribute 'default nil :height 130)
 
 ;; IBuffer
 (setq ibuffer-formats
@@ -210,11 +248,19 @@
 ;; Fiplr
 (setq fiplr-root-markers '(".git" ".svn"))
 (setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
-                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS" "*.ru"))))
+                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS" "*.ru" ".keep"))))
 
 ;; Folding
 (setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
-(require 'ruby-mode)
+(autoload 'enh-ruby-mode "enh-ruby-mode" "Major mode for ruby files" t)
+(add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("Rakefile$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.gemspec$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.ru$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("Gemfile$" . enh-ruby-mode))
+;;(require 'ruby-mode)
+(add-hook 'ruby-mode-hook 'robe-mode)
 (add-to-list 'hs-special-modes-alist
              '(ruby-mode
                "\\(class\\|def\\|do\\|if\\)" "\\(end\\)" "#"
@@ -286,32 +332,37 @@ This functions should be added to the hooks of major modes for programming."
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
-(global-set-key (kbd "C-c a") 'ack-and-a-half)
-(global-set-key (kbd "C-c b") 'bs-show)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-(global-set-key (kbd "C-c j") 'dired-jump)
-(global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-set-key (kbd "C-c k") 'kill-this-buffer)
-(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
-(global-set-key (kbd "C-c f") 'fiplr-find-file)
-(global-set-key (kbd "C-c o") 'vi-open-line-below)
-(global-set-key (kbd "C-c O") 'vi-open-line-above)
-(global-set-key (kbd "C-c r") 'rspec-verify-single)
-(global-set-key [(control ?.)] 'goto-last-change)
-(global-set-key [(control ?,)] 'goto-last-change-reverse)
+;; (global-set-key (kbd "C-c a") 'ack-and-a-half)
+;; (global-set-key (kbd "C-c b") 'bs-show)
+;; (global-set-key (kbd "C-x C-b") 'ibuffer)
+;; (global-set-key (kbd "C-c j") 'dired-jump)
+;; (global-set-key (kbd "C-c d") 'duplicate-line)
+;; (global-set-key (kbd "C-c g") 'magit-status)
+;; (global-set-key (kbd "C-c k") 'kill-this-buffer)
+;; (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
+;; (global-set-key (kbd "C-c f") 'fiplr-find-file)
+;; (global-set-key (kbd "C-c o") 'vi-open-line-below)
+;; (global-set-key (kbd "C-c O") 'vi-open-line-above)
+;; (global-set-key (kbd "C-c r") 'rspec-verify-single)
+;; (global-set-key [(control ?.)] 'goto-last-change)
+;; (global-set-key [(control ?,)] 'goto-last-change-reverse)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
 (if (file-exists-p "~/.emacs.d/personal.el")
     (load "personal"))
 
+(server-start)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+ '(custom-safe-themes (quote ("1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+ '(fci-dash-pattern 0.75)
+ '(magit-restore-window-configuration t)
+ '(magit-server-window-for-commit nil)
  '(scss-compile-at-save nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

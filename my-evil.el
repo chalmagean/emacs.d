@@ -1,10 +1,11 @@
-(setq evil-default-cursor t)
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
 (setq evil-complete-all-buffers nil)
 (require 'evil)
 (evil-mode 1)
+(setq evil-default-cursor t)
+(set-cursor-color "DarkCyan")
 
 ;; Clear insert state bindings.
 ;; (setcdr evil-insert-state-map nil)
@@ -37,7 +38,7 @@
 (setq evil-esc-delay 0)
 
 ; BS-menu
-(defadvice bs-mode (after bs-mode-override-keybindings activate)
+(defadvice bs-mode (before bs-mode-override-keybindings activate)
   ;; use the standard bs bindings as a base
   (evil-make-overriding-map bs-mode-map 'normal t)
   (evil-define-key 'normal bs-mode-map "h" 'evil-backward-char)
@@ -46,6 +47,7 @@
   (evil-define-key 'normal bs-mode-map "k" 'bs-up)
   (evil-define-key 'normal bs-mode-map "l" 'evil-forward-char)
   (evil-define-key 'normal bs-mode-map "RET" 'bs-select))
+
 
 ;; Make HJKL keys work in special buffers
 (evil-add-hjkl-bindings magit-branch-manager-mode-map 'emacs
@@ -61,6 +63,8 @@
 
 ;; Evil Keys
 (define-key evil-insert-state-map "k" #'cofi/maybe-exit)
+
+(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
 (define-key evil-normal-state-map ",a" 'ack-and-a-half)
 (define-key evil-normal-state-map ",g" 'magit-status)
