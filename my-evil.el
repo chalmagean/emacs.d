@@ -14,6 +14,7 @@
 (evil-set-initial-state 'magit-log-edit-mode 'emacs)
 (evil-set-initial-state 'nav-mode 'emacs)
 (evil-set-initial-state 'grep-mode 'emacs)
+(evil-set-initial-state 'ibuffer-mode 'normal)
 
 (require 'surround)
 (global-surround-mode 1)
@@ -73,6 +74,7 @@
 (define-key evil-normal-state-map ",f" 'find-file)
 (define-key evil-normal-state-map ",F" 'fiplr-find-file)
 (define-key evil-normal-state-map ",b" 'bs-show)
+(define-key evil-normal-state-map ",B" 'ibuffer)
 (define-key evil-normal-state-map ",x" 'execute-extended-command)
 (define-key evil-normal-state-map ",d" 'kill-this-buffer)
 (define-key evil-normal-state-map ",q" 'kill-buffer-and-window)

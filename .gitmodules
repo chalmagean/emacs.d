@@ -1,0 +1,3 @@
+[submodule "vendor/god-mode"]
+	path = vendor/god-mode
+	url = https://github.com/chrisdone/god-mode.git

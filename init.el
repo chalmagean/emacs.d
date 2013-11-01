@@ -18,8 +18,8 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            'evil
-            'surround
+            ;;'evil
+            ;;'surround
             'git-commit-mode
             'git-rebase-mode
             'gitconfig-mode
@@ -42,6 +42,7 @@
             'rvm
             'ag
             'rinari
+            'smartparens
             'web-mode
             'feature-mode
             'auto-compile
@@ -66,6 +67,12 @@
 (window-number-mode)
 (window-number-meta-mode)
 
+;; Smart scan
+;;(smartscan-mode 1)
+
+;; Smart parens
+(show-smartparens-global-mode +1)
+
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
 
@@ -89,6 +96,17 @@
 
 ;; Web mode
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+
+;; God mode
+(require 'god-mode)
+(global-set-key (kbd "<escape>") 'god-local-mode)
+(defun my-update-cursor ()
+  (setq cursor-type (if (or god-local-mode buffer-read-only)
+                        'box
+                      'bar)))
+
+(add-hook 'god-mode-enabled-hook 'my-update-cursor)
+(add-hook 'god-mode-disabled-hook 'my-update-cursor)
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
@@ -188,7 +206,7 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-(load "~/.emacs.d/my-evil")
+;;(load "~/.emacs.d/my-evil")
 
 ;; Powerline
 (require 'powerline)
@@ -196,6 +214,9 @@
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
+;; (setq mac-option-modifier 'none)
+;; (setq mac-option-key-is-meta t)
+;; (setq mac-right-option-modifier nil)
 
 ;; Choosing a dark theme
 ;; (load-theme 'base16-default t)
@@ -222,7 +243,7 @@
 (tool-bar-mode 0)
 
 ;; Font
-(set-frame-font "Menlo-14")
+(set-frame-font "Monaco-13")
 ;;(set-face-attribute 'default nil :height 130)
 
 ;; IBuffer
@@ -313,6 +334,7 @@
 
 ;; Ack
 ;; Always prompt for a directory root
+(require 'ack-and-a-half)
 (setq ack-and-a-half-prompt-for-directory t)
 (setq ack-and-a-half-executable "/usr/local/bin/ack")
 
@@ -332,20 +354,20 @@ This functions should be added to the hooks of major modes for programming."
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
-;; (global-set-key (kbd "C-c a") 'ack-and-a-half)
-;; (global-set-key (kbd "C-c b") 'bs-show)
-;; (global-set-key (kbd "C-x C-b") 'ibuffer)
-;; (global-set-key (kbd "C-c j") 'dired-jump)
-;; (global-set-key (kbd "C-c d") 'duplicate-line)
-;; (global-set-key (kbd "C-c g") 'magit-status)
-;; (global-set-key (kbd "C-c k") 'kill-this-buffer)
-;; (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
-;; (global-set-key (kbd "C-c f") 'fiplr-find-file)
-;; (global-set-key (kbd "C-c o") 'vi-open-line-below)
-;; (global-set-key (kbd "C-c O") 'vi-open-line-above)
-;; (global-set-key (kbd "C-c r") 'rspec-verify-single)
-;; (global-set-key [(control ?.)] 'goto-last-change)
-;; (global-set-key [(control ?,)] 'goto-last-change-reverse)
+(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+(global-set-key (kbd "C-c C-b") 'bs-show)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(global-set-key (kbd "C-c C-j") 'dired-jump)
+(global-set-key (kbd "C-c C-d") 'duplicate-line)
+(global-set-key (kbd "C-c C-g") 'magit-status)
+(global-set-key (kbd "C-c C-k") 'kill-this-buffer)
+(global-set-key (kbd "C-c C-K") 'kill-buffer-and-window)
+(global-set-key (kbd "C-c C-f") 'fiplr-find-file)
+(global-set-key (kbd "C-c C-o") 'vi-open-line-below)
+(global-set-key (kbd "C-c C-O") 'vi-open-line-above)
+(global-set-key (kbd "C-c C-r") 'rspec-verify-single)
+(global-set-key [(control ?.)] 'goto-last-change)
+(global-set-key [(control ?,)] 'goto-last-change-reverse)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here

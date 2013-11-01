@@ -1,6 +1,9 @@
 ;; I want this for dired-jump
 (require 'dired-x)
 
+;; Nice listing
+(setq find-ls-option '("-print0 | xargs -0 ls -alhd" . ""))
+
 ;; Always copy/delete recursively
 (setq dired-recursive-copies (quote always))
 (setq dired-recursive-deletes (quote top))
