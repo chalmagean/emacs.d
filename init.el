@@ -22,9 +22,10 @@
             'guide-key
             'project-explorer
             'eproject
-            'evil
-            'surround
             's
+            'ido-vertical-mode
+            'ido-hacks
+            'flx-ido
             'expand-region
             'perspective
             'git-commit-mode
@@ -211,13 +212,13 @@
 (load "~/.emacs.d/my-magit")
 
 ;; IDO
-;; (load "~/.emacs.d/my-ido")
+(load "~/.emacs.d/my-ido")
 
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-(load "~/.emacs.d/my-evil")
+;;(load "~/.emacs.d/my-evil")
 
 ;; Powerline
 (require 'powerline)
