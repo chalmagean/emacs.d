@@ -18,8 +18,15 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            ;;'evil
-            ;;'surround
+            'smartscan
+            'guide-key
+            'project-explorer
+            'eproject
+            'evil
+            'surround
+            's
+            'expand-region
+            'perspective
             'git-commit-mode
             'git-rebase-mode
             'gitconfig-mode
@@ -38,6 +45,8 @@
             'ibuffer-vc
             'powerline
             'fill-column-indicator
+            'ace-jump-mode
+            'ace-jump-buffer
             'enclose
             'rvm
             'ag
@@ -67,8 +76,21 @@
 (window-number-mode)
 (window-number-meta-mode)
 
+;; Guide key
+(require 'guide-key)
+(setq guide-key/guide-key-sequence '("C-x r" "C-x 4"))
+(setq guide-key/highlight-command-regexp "rectangle")
+(guide-key-mode 1)
+
+;; Project explorer
+(require 'project-explorer)
+
+;; Expand region
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
 ;; Smart scan
-;;(smartscan-mode 1)
+(smartscan-mode 1)
 
 ;; Smart parens
 (show-smartparens-global-mode +1)
@@ -96,17 +118,6 @@
 
 ;; Web mode
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-
-;; God mode
-(require 'god-mode)
-(global-set-key (kbd "<escape>") 'god-local-mode)
-(defun my-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only)
-                        'box
-                      'bar)))
-
-(add-hook 'god-mode-enabled-hook 'my-update-cursor)
-(add-hook 'god-mode-disabled-hook 'my-update-cursor)
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
@@ -206,7 +217,7 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-;;(load "~/.emacs.d/my-evil")
+(load "~/.emacs.d/my-evil")
 
 ;; Powerline
 (require 'powerline)
@@ -270,6 +281,9 @@
 (setq fiplr-root-markers '(".git" ".svn"))
 (setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
                             (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS" "*.ru" ".keep"))))
+
+;; Ace jump
+(require 'ace-jump-mode)
 
 ;; Folding
 (setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
@@ -354,20 +368,32 @@ This functions should be added to the hooks of major modes for programming."
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
-(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
-(global-set-key (kbd "C-c C-b") 'bs-show)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-(global-set-key (kbd "C-c C-j") 'dired-jump)
-(global-set-key (kbd "C-c C-d") 'duplicate-line)
-(global-set-key (kbd "C-c C-g") 'magit-status)
-(global-set-key (kbd "C-c C-k") 'kill-this-buffer)
-(global-set-key (kbd "C-c C-K") 'kill-buffer-and-window)
-(global-set-key (kbd "C-c C-f") 'fiplr-find-file)
-(global-set-key (kbd "C-c C-o") 'vi-open-line-below)
-(global-set-key (kbd "C-c C-O") 'vi-open-line-above)
-(global-set-key (kbd "C-c C-r") 'rspec-verify-single)
+(global-set-key (kbd "C-c a") 'ack-and-a-half)
+(global-set-key (kbd "C-c b") 'ace-jump-buffer)
+(global-set-key (kbd "C-c SPC") 'ace-jump-mode)
+(global-set-key (kbd "C-x b") 'ibuffer)
+(global-set-key (kbd "C-c j") 'dired-jump)
+(global-set-key (kbd "C-c d") 'duplicate-line)
+(global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-c k") 'kill-this-buffer)
+(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
+(global-set-key (kbd "C-c f") 'fiplr-find-file)
+(global-set-key (kbd "C-c o") 'vi-open-line-below)
+(global-set-key (kbd "C-c O") 'vi-open-line-above)
+(global-set-key (kbd "C-c r") 'rspec-verify-single)
 (global-set-key [(control ?.)] 'goto-last-change)
 (global-set-key [(control ?,)] 'goto-last-change-reverse)
+
+;; God mode
+(require 'god-mode)
+(global-set-key (kbd "<escape>") 'god-local-mode)
+(defun my-update-cursor ()
+  (setq cursor-type (if (or god-local-mode buffer-read-only)
+                        'box
+                      'bar)))
+
+(add-hook 'god-mode-enabled-hook 'my-update-cursor)
+(add-hook 'god-mode-disabled-hook 'my-update-cursor)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
