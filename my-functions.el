@@ -155,7 +155,7 @@ LIST defaults to all existing live buffers."
   (interactive)
   (message "building project tags")
   (let ((default-directory (eproject-root)))
-    (shell-command (concat "exctags -e -R --extra=+fq --exclude=db --exclude=test --exclude=.git --exclude=public -f TAGS * " (trim-string (shell-command-to-string "rvm gemdir")) "/gems/*"))
+    (shell-command (concat "exctags -e -R --extra=+fq --exclude=db --exclude=test --exclude=.git --exclude=public -f TAGS * " (s-trim (shell-command-to-string "rvm gemdir")) "/gems/*"))
     (visit-project-tags)
     (message "tags built successfully")))
 
@@ -173,7 +173,7 @@ LIST defaults to all existing live buffers."
   "Moves the point to the newly created window after splitting."
   (other-window 1))
 
-(defun get-current-ticket ()
+(defun git-extract-number-from-branch-name ()
   (interactive)
   (let ((current-branch-name (magit-get-current-branch)))
     (progn (string-match "\\([0-9]+\\)" current-branch-name)
