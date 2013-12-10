@@ -4,8 +4,11 @@
 (setq exec-path (append exec-path '("/usr/local/bin")))
 
 ;; Adding folders to the load path
-(add-to-list 'load-path "~/.emacs.d/")
+;;(add-to-list 'load-path "~/.emacs.d/")
 (add-to-list 'load-path "~/.emacs.d/vendor/")
+
+;; Default to home dir
+(cd "~/")
 
 ;; Using MELPA for packages
 (when (>= emacs-major-version 24)
@@ -20,12 +23,12 @@
       (list 'magit
             'smartscan
             'guide-key
-            'project-explorer
-            'eproject
+            'robe
             's
             'ido-vertical-mode
             'ido-hacks
             'flx-ido
+            'projectile-rails
             'expand-region
             'perspective
             'git-commit-mode
@@ -35,8 +38,6 @@
             'scss-mode
             'sass-mode
             'ack-and-a-half
-            'enh-ruby-mode
-            'robe
             'ruby-tools
             'highlight-indentation
             'window-number
@@ -64,8 +65,7 @@
             'undo-tree
             'inf-ruby
             'flx
-            'goto-chg
-            'fiplr))
+            'goto-chg))
 
 (dolist (package my-required-packages)
   (when (not (package-installed-p package))
@@ -83,12 +83,9 @@
 (setq guide-key/highlight-command-regexp "rectangle")
 (guide-key-mode 1)
 
-;; Project explorer
-(require 'project-explorer)
 
 ;; Expand region
 (require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
 
 ;; Smart scan
 (smartscan-mode 1)
@@ -220,10 +217,6 @@
 ;; Evil stuff
 ;;(load "~/.emacs.d/my-evil")
 
-;; Powerline
-(require 'powerline)
-(powerline-center-evil-theme)
-
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
 ;; (setq mac-option-modifier 'none)
@@ -236,7 +229,7 @@
 
 ;; Default frame size
 (setq initial-frame-alist
-      '((top . 150) (left . 300) (width . 120) (height . 55)))
+      '((top . 100) (left . 300) (width . 120) (height . 55)))
    
 ;; Making dabbrev a bit nicer
 (setq dabbrev-abbrev-skip-leading-regexp ":")
@@ -278,45 +271,20 @@
   uniquify-buffer-name-style 'post-forward
   uniquify-separator " : ")
 
-;; Fiplr
-(setq fiplr-root-markers '(".git" ".svn"))
-(setq fiplr-ignored-globs '((directories (".git" ".svn" "selenium" "doc" "tmp"))
-                            (files ("*.jpg" "*.png" "*.zip" "*~" ".DS_Store" "tags" "TAGS" "*.ru" ".keep"))))
-
 ;; Ace jump
 (require 'ace-jump-mode)
+(autoload
+  'ace-jump-mode-pop-mark
+  "ace-jump-mode"
+  "Ace jump back:-)"
+  t)
+(eval-after-load "ace-jump-mode"
+  '(ace-jump-mode-enable-mark-sync))
+(define-key global-map (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
 
-;; Folding
-(setq enh-ruby-program "~/.rvm/rubies/ruby-2.0.0-p195/bin/ruby")
-(autoload 'enh-ruby-mode "enh-ruby-mode" "Major mode for ruby files" t)
-(add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
-(add-to-list 'auto-mode-alist '("Rakefile$" . enh-ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.gemspec$" . enh-ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.ru$" . enh-ruby-mode))
-(add-to-list 'auto-mode-alist '("Gemfile$" . enh-ruby-mode))
-;;(require 'ruby-mode)
-(add-hook 'ruby-mode-hook 'robe-mode)
-(add-to-list 'hs-special-modes-alist
-             '(ruby-mode
-               "\\(class\\|def\\|do\\|if\\)" "\\(end\\)" "#"
-               (lambda (arg) (ruby-end-of-block)) nil))
-(add-hook 'ruby-mode-hook
-          (lambda ()
-            (hs-minor-mode 1) ;; Enables folding
-            (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
-
-(defun ruby-interpolate ()
-  "In a double quoted string, interpolate."
-  (interactive)
-  (insert "#")
-  (when (and
-         (looking-back "\".*")
-         (looking-at ".*\""))
-    (insert "{}")
-    (backward-char 1)))
-
-;;(define-key enh-ruby-mode-map (kbd "C-c #") 'ruby-interpolate)
+;; Ruby
+(load "~/.emacs.d/my-ruby")
 
 ;; Rhtml mode
 (require 'rhtml-mode)
@@ -369,6 +337,7 @@ This functions should be added to the hooks of major modes for programming."
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
 (global-set-key (kbd "<f1>") 'open-emacs-init-file)
+(global-set-key (kbd "C-=") 'er/expand-region)
 (global-set-key (kbd "C-c a") 'ack-and-a-half)
 (global-set-key (kbd "C-c b") 'ace-jump-buffer)
 (global-set-key (kbd "C-c SPC") 'ace-jump-mode)
@@ -382,19 +351,9 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
 (global-set-key (kbd "C-c r") 'rspec-verify-single)
+(global-set-key (kbd "C-c p") 'project-explorer-open)
 (global-set-key [(control ?.)] 'goto-last-change)
 (global-set-key [(control ?,)] 'goto-last-change-reverse)
-
-;; God mode
-(require 'god-mode)
-(global-set-key (kbd "<escape>") 'god-local-mode)
-(defun my-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only)
-                        'box
-                      'bar)))
-
-(add-hook 'god-mode-enabled-hook 'my-update-cursor)
-(add-hook 'god-mode-disabled-hook 'my-update-cursor)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
@@ -408,10 +367,7 @@ This functions should be added to the hooks of major modes for programming."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
- '(fci-dash-pattern 0.75)
+ '(custom-safe-themes (quote ("1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
@@ -421,6 +377,8 @@ This functions should be added to the hooks of major modes for programming."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
+ '(diff-removed ((t (:inherit diff-changed :foreground "#ff0000"))))
  '(erb-face ((t nil)))
  '(erb-out-delim-face ((t (:foreground "#aaffff")))))
 (put 'downcase-region 'disabled nil)
