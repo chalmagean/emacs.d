@@ -3,3 +3,8 @@ elpa/
 .places
 /.DS_Store
 personal.*
+auto-save-list/
+bookmarks
+var/
+projectile*
+*.dat

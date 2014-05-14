@@ -21,21 +21,15 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            'smartscan
-            'guide-key
             'robe
+            'evil
+            'surround
+            'evil-leader
             's
-            'ido-vertical-mode
-            'ido-hacks
-            'flx-ido
+            'coffee-mode
+            'bundler
             'projectile
             'projectile-rails
-            'expand-region
-            'perspective
-            'git-commit-mode
-            'git-rebase-mode
-            'gitconfig-mode
-            'gitignore-mode
             'scss-mode
             'sass-mode
             'f
@@ -49,25 +43,18 @@
             'rhtml-mode
             'dired-details
             'yasnippet
+            'yari
             'ibuffer-vc
-            'powerline
             'fill-column-indicator
-            'enclose
             'rvm
-            'ag
             'rinari
-            'smartparens
             'web-mode
             'feature-mode
             'auto-compile
             'yaml-mode
-            'markdown-mode
-            'wrap-region
-            'gist
             'rspec-mode
             'undo-tree
             'inf-ruby
-            'flx
             'goto-chg))
 
 (dolist (package my-required-packages)
@@ -84,22 +71,6 @@
 (require 'window-number)
 (window-number-mode)
 (window-number-meta-mode)
-
-;; Guide key
-(require 'guide-key)
-(setq guide-key/guide-key-sequence '("C-x r" "C-x 4"))
-(setq guide-key/highlight-command-regexp "rectangle")
-(guide-key-mode 1)
-
-
-;; Expand region
-(require 'expand-region)
-
-;; Smart scan
-(smartscan-mode 1)
-
-;; Smart parens
-(show-smartparens-global-mode +1)
 
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
@@ -119,8 +90,6 @@
 (require 'fill-column-indicator)
 (setq fci-rule-use-dashes nil)
 (setq fci-always-use-textual-rule nil)
-
-(require 'highlight-indentation)
 
 ;; Web mode
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
@@ -178,10 +147,6 @@
    (set-face-attribute face nil :weight 'normal :underline nil))
  (face-list))
 
-;; Recompile lisp files when changed
-(require 'auto-compile)
-(auto-compile-on-save-mode 1)
-
 ;; Showing whitespace
 (setq whitespace-style (quote (spaces tabs newline space-mark tab-mark newline-mark)))
 (setq whitespace-display-mappings
@@ -216,14 +181,11 @@
 ;; Magit
 (load "~/.emacs.d/my-magit")
 
-;; IDO
-;;(load "~/.emacs.d/my-ido")
-
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-;;(load "~/.emacs.d/my-evil")
+(load "~/.emacs.d/my-evil")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -244,6 +206,9 @@
 (setq dabbrev-abbrev-skip-leading-regexp ":")
 (setq dabbrev-backward-only t)
 
+;; Use frames instead of windows for compilation popups
+;; (setq-default display-buffer-reuse-frames t)
+
 ;; Show line numbers only in opened files
 ;; Another option could be: http://www.emacswiki.org/emacs/linum-off.el
 (add-hook 'find-file-hook (lambda () (linum-mode 1)))
@@ -258,7 +223,7 @@
 (tool-bar-mode 0)
 
 ;; Font
-(set-frame-font "Monaco-12")
+(set-frame-font "Monaco-13")
 
 ;; IBuffer
 (setq ibuffer-formats
@@ -330,22 +295,27 @@ This functions should be added to the hooks of major modes for programming."
 
 (defun open-emacs-init-file()
   "Opens the init.el file"
-  (interactive)
+ (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
-(global-set-key (kbd "<f1>") 'open-emacs-init-file)
-(global-set-key (kbd "C-c a") 'ack-and-a-half)
-(global-set-key (kbd "C-c j") 'dired-jump)
-(global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-set-key (kbd "C-c k") 'kill-this-buffer)
-(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
-(global-set-key (kbd "C-c f") 'fiplr-find-file)
-(global-set-key (kbd "C-c o") 'vi-open-line-below)
-(global-set-key (kbd "C-c O") 'vi-open-line-above)
-(global-set-key (kbd "C-c r") 'rspec-verify-single)
-(global-set-key [(control ?.)] 'goto-last-change)
-(global-set-key [(control ?,)] 'goto-last-change-reverse)
+;;(global-set-key (kbd "C-x C-1") 'delete-other-windows)
+;;(global-set-key (kbd "C-x C-2") 'split-window-below)
+;;(global-set-key (kbd "C-x C-3") 'split-window-right)
+;;(global-set-key (kbd "C-x C-0") 'delete-window)
+;;(global-set-key (kbd "<f2>") 'open-emacs-init-file)
+;;(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+;;(global-set-key (kbd "C-x C-b") 'bs-show) 
+;;(global-set-key (kbd "C-c C-j") 'dired-jump)
+;;(global-set-key (kbd "C-c C-d") 'duplicate-line)
+;;(global-set-key (kbd "C-c C-g") 'magit-status)
+;;(global-set-key (kbd "C-c C-k") 'kill-this-buffer)
+;;(global-set-key (kbd "C-c C-K") 'kill-buffer-and-window)
+;;(global-set-key (kbd "C-c C-f") 'fiplr-find-file)
+;;(global-set-key (kbd "C-c C-o") 'vi-open-line-below)
+;;(global-set-key (kbd "C-c C-O") 'vi-open-line-above)
+;;(global-set-key (kbd "C-c C-r") 'rspec-verify-single)
+;;(global-set-key [(control ?.)] 'goto-last-change)
+;;(global-set-key [(control ?,)] 'goto-last-change-reverse)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
@@ -361,6 +331,7 @@ This functions should be added to the hooks of major modes for programming."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes (quote ("af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(debug-on-error t)
+ '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
@@ -371,8 +342,12 @@ This functions should be added to the hooks of major modes for programming."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
+ '(diff-context ((t (:background "#3c3c35" :foreground "#666666"))))
  '(diff-removed ((t (:inherit diff-changed :foreground "#ff0000"))))
  '(erb-face ((t nil)))
- '(erb-out-delim-face ((t (:foreground "#aaffff")))))
+ '(erb-out-delim-face ((t (:foreground "#aaffff"))))
+ '(magit-diff-add ((t (:inherit diff-added :background "#3c3c35"))))
+ '(magit-diff-del ((t (:inherit diff-removed :background "#3c3c35"))))
+ '(magit-item-highlight ((t (:background "#3c3c35")))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

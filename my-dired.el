@@ -1,6 +1,9 @@
 ;; I want this for dired-jump
 (require 'dired-x)
 
+(require 'dired-details)
+(dired-details-install)
+
 ;; Nice listing
 (setq find-ls-option '("-print0 | xargs -0 ls -alhd" . ""))
 

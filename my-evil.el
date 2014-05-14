@@ -1,7 +1,11 @@
+;; enable evil leader
+(global-evil-leader-mode)
+
 (setq evil-shift-width 2)
 (setq evil-want-C-i-jump t)
 (setq evil-want-C-u-scroll t)
 (setq evil-complete-all-buffers nil)
+
 (require 'evil)
 (evil-mode 1)
 (setq evil-default-cursor t)
@@ -19,22 +23,6 @@
 (require 'surround)
 (global-surround-mode 1)
 
-(evil-define-command cofi/maybe-exit ()
-  :repeat change
-  (interactive)
-  (let ((modified (buffer-modified-p)))
-    (insert "k")
-    (let ((evt (read-event (format "Insert %c to exit insert state" ?j)
-               nil 0.5)))
-      (cond
-       ((null evt) (message ""))
-       ((and (integerp evt) (char-equal evt ?j))
-    (delete-char -1)
-    (set-buffer-modified-p modified)
-    (push 'escape unread-command-events))
-       (t (setq unread-command-events (append unread-command-events
-                          (list evt))))))))
-
 ;; Don't wait for any other keys after escape is pressed.
 (setq evil-esc-delay 0)
 
@@ -49,7 +37,6 @@
   (evil-define-key 'normal bs-mode-map "l" 'evil-forward-char)
   (evil-define-key 'normal bs-mode-map "RET" 'bs-select))
 
-
 ;; Make HJKL keys work in special buffers
 (evil-add-hjkl-bindings magit-branch-manager-mode-map 'emacs
   "K" 'magit-discard-item
@@ -63,21 +50,23 @@
 (evil-add-hjkl-bindings occur-mode 'emacs)
 
 ;; Evil Keys
-(define-key evil-insert-state-map "k" #'cofi/maybe-exit)
-
 (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(define-key evil-normal-state-map ",w" 'save-buffer) ; save
-(define-key evil-normal-state-map ",a" 'ack-and-a-half)
-(define-key evil-normal-state-map ",g" 'magit-status)
-(define-key evil-normal-state-map ",j" 'dired-jump)
-(define-key evil-normal-state-map ",," 'evil-buffer)
-(define-key evil-normal-state-map ",f" 'find-file)
-(define-key evil-normal-state-map ",F" 'fiplr-find-file)
-(define-key evil-normal-state-map ",b" 'bs-show)
-(define-key evil-normal-state-map ",B" 'ibuffer)
-(define-key evil-normal-state-map ",x" 'execute-extended-command)
-(define-key evil-normal-state-map ",d" 'kill-this-buffer)
-(define-key evil-normal-state-map ",q" 'kill-buffer-and-window)
+(define-key evil-normal-state-map (kbd "C-v") 'evil-scroll-down)
+(evil-leader/set-leader "<SPC>")
+(evil-leader/set-key
+  "w" 'save-buffer
+  "a" 'ack-and-a-half
+  "g" 'magit
+  "j" 'dired-jump
+  "<SPC>" 'evil-buffer
+  "f" 'find-file
+  "F" 'fiplr-find-file
+  "b" 'bs-show
+  "B" 'ibuffer
+  "x" 'execute-extended-command
+  "d" 'kill-this-buffer
+  "q" 'kill-buffer-and-window
+  )
 
 ;; RSPEC, requires rspec-mode
 (evil-declare-key 'normal ruby-mode-map (kbd ",ss") 'rspec-verify-single)
