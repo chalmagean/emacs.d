@@ -22,14 +22,12 @@
 (setq my-required-packages
       (list 'magit
             'robe
-            'evil
-            'surround
-            'evil-leader
             's
             'coffee-mode
             'bundler
             'projectile
             'projectile-rails
+            'rubocop
             'scss-mode
             'sass-mode
             'f
@@ -61,11 +59,6 @@
   (when (not (package-installed-p package))
     (package-refresh-contents)
     (package-install package)))
-
-;; Projectile
-(projectile-global-mode)
-(setq projectile-completion-system 'grizzl)
-(add-hook 'projectile-mode-hook 'projectile-rails-on)
 
 ;; Window numbers
 (require 'window-number)
@@ -103,6 +96,10 @@
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
 (setq split-width-threshold nil)
+
+;; Stop that bell sound
+(setq visible-bell t)
+(setq ring-bell-function (lambda () (message "*beep*")))
 
 ;; Yaml
 (require 'yaml-mode)
@@ -148,6 +145,9 @@
  (face-list))
 
 ;; Showing whitespace
+(require 'whitespace)
+(setq whitespace-line-column 80) ;; limit line length
+(setq whitespace-style '(face lines-tail))
 (setq whitespace-style (quote (spaces tabs newline space-mark tab-mark newline-mark)))
 (setq whitespace-display-mappings
       ;; all numbers are Unicode codepoint in decimal. e.g. (insert-char 182 1)
@@ -185,7 +185,7 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-(load "~/.emacs.d/my-evil")
+;;(load "~/.emacs.d/my-evil")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -291,6 +291,10 @@ This functions should be added to the hooks of major modes for programming."
    nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):"
           1 font-lock-warning-face t))))
 
+(require 'highlight-symbol)
+(global-set-key (kbd "C-8") 'highlight-symbol-next)
+(global-set-key (kbd "C-*") 'highlight-symbol-prev)
+
 (add-hook 'prog-mode-hook 'font-lock-comment-annotations)
 
 (defun open-emacs-init-file()
@@ -298,24 +302,23 @@ This functions should be added to the hooks of major modes for programming."
  (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
-;;(global-set-key (kbd "C-x C-1") 'delete-other-windows)
-;;(global-set-key (kbd "C-x C-2") 'split-window-below)
-;;(global-set-key (kbd "C-x C-3") 'split-window-right)
-;;(global-set-key (kbd "C-x C-0") 'delete-window)
-;;(global-set-key (kbd "<f2>") 'open-emacs-init-file)
-;;(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
-;;(global-set-key (kbd "C-x C-b") 'bs-show) 
-;;(global-set-key (kbd "C-c C-j") 'dired-jump)
-;;(global-set-key (kbd "C-c C-d") 'duplicate-line)
-;;(global-set-key (kbd "C-c C-g") 'magit-status)
-;;(global-set-key (kbd "C-c C-k") 'kill-this-buffer)
-;;(global-set-key (kbd "C-c C-K") 'kill-buffer-and-window)
-;;(global-set-key (kbd "C-c C-f") 'fiplr-find-file)
-;;(global-set-key (kbd "C-c C-o") 'vi-open-line-below)
-;;(global-set-key (kbd "C-c C-O") 'vi-open-line-above)
-;;(global-set-key (kbd "C-c C-r") 'rspec-verify-single)
-;;(global-set-key [(control ?.)] 'goto-last-change)
-;;(global-set-key [(control ?,)] 'goto-last-change-reverse)
+(global-set-key (kbd "<f2>") 'open-emacs-init-file)
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+(global-set-key (kbd "C-x b") 'bs-show) 
+(global-set-key (kbd "C-c j") 'dired-jump)
+(global-set-key (kbd "C-c d") 'duplicate-line)
+(global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
+(global-set-key (kbd "C-c o") 'vi-open-line-below)
+(global-set-key (kbd "C-c O") 'vi-open-line-above)
+(global-set-key (kbd "C-c r") 'rspec-verify-single)
+(global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
+(global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
+(global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
+(global-set-key [(control ?.)] 'goto-last-change)
+(global-set-key [(control ?,)] 'goto-last-change-reverse)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here

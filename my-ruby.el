@@ -15,9 +15,14 @@
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 (require 'projectile)
+(setq projectile-completion-system 'grizzl)
 (add-hook 'ruby-mode-hook 'robe-mode)
 (add-hook 'ruby-mode-hook 'projectile-on)
+(add-hook 'coffee-mode-hook 'projectile-on)
 (add-hook 'projectile-mode-hook 'projectile-rails-on)
+
+;; Rubocop
+(require 'rubocop)
 
 (defun ruby-interpolate ()
   "In a double quoted string, interpolate."
