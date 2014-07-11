@@ -21,9 +21,14 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
+            'evil
+            'evil-jumper
+            'evil-visualstar
+            'surround
             'robe
             's
             'coffee-mode
+            'sourcemap
             'bundler
             'projectile
             'projectile-rails
@@ -53,6 +58,7 @@
             'rspec-mode
             'undo-tree
             'inf-ruby
+            'discover-my-major
             'goto-chg))
 
 (dolist (package my-required-packages)
@@ -85,7 +91,15 @@
 (setq fci-always-use-textual-rule nil)
 
 ;; Web mode
+(require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+
+;; Coffee Script
+(setq coffee-args-compile '("-c" "-m")) ;; generating sourcemap
+(add-hook 'coffee-after-compile-hook 'sourcemap-goto-corresponding-point)
+(defun coffee-after-compile-delete-file (props)
+  (delete-file (plist-get props :sourcemap)))
+(add-hook 'coffee-after-compile-hook 'coffee-after-compile-delete-file t)
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
@@ -104,6 +118,11 @@
 ;; Yaml
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+
+;; Projectile mode
+(require 'projectile)
+(projectile-global-mode)
+(add-hook 'projectile-mode-hook 'projectile-rails-on)
 
 ;; Load custom snippets
 (require 'yasnippet)
@@ -185,7 +204,7 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-;;(load "~/.emacs.d/my-evil")
+(load "~/.emacs.d/my-evil")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
@@ -249,8 +268,8 @@
 (load "~/.emacs.d/my-ruby")
 
 ;; Rhtml mode
-(require 'rhtml-mode)
-(add-to-list 'auto-mode-alist '("\\.html.erb?\\'" . rhtml-mode))
+;; (require 'rhtml-mode)
+;; (add-to-list 'auto-mode-alist '("\\.html.erb?\\'" . rhtml-mode))
 
 ;; Bind YARI to C-h R
 (define-key 'help-command "R" 'yari)
@@ -296,29 +315,63 @@ This functions should be added to the hooks of major modes for programming."
 (global-set-key (kbd "C-*") 'highlight-symbol-prev)
 
 (add-hook 'prog-mode-hook 'font-lock-comment-annotations)
+(defun prelude-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+(global-set-key [remap move-beginning-of-line]
+                'prelude-move-beginning-of-line)
 
 (defun open-emacs-init-file()
   "Opens the init.el file"
  (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
                                           
+(global-set-key (kbd "C-h C-m") 'discover-my-major)
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
-(global-set-key (kbd "C-x b") 'bs-show) 
-(global-set-key (kbd "C-c j") 'dired-jump)
-(global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
-(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
-(global-set-key (kbd "C-c o") 'vi-open-line-below)
-(global-set-key (kbd "C-c O") 'vi-open-line-above)
-(global-set-key (kbd "C-c r") 'rspec-verify-single)
-(global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
-(global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
-(global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
-(global-set-key [(control ?.)] 'goto-last-change)
-(global-set-key [(control ?,)] 'goto-last-change-reverse)
+;; (global-unset-key (kbd "C-c C-x"))
+;; (global-set-key (kbd "C-c C-x") 'execute-extended-command)
+;; (global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+;; (global-set-key (kbd "C-x b") 'bs-show) 
+;; (global-set-key (kbd "C-c j") 'dired-jump)
+;; (global-set-key (kbd "C-c d") 'duplicate-line)
+;; (global-set-key (kbd "C-c g") 'magit-status)
+;; (global-set-key (kbd "C-x k") 'kill-this-buffer)
+;; (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
+;; (global-set-key (kbd "C-c o") 'vi-open-line-below)
+;; (global-set-key (kbd "C-=") 'er/expand-region)
+;; (global-set-key (kbd "C-c O") 'vi-open-line-above)
+;; (global-set-key (kbd "C-c r") 'rspec-verify-single)
+;; (global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
+;; (global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
+;; (global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
+;; (global-set-key (kbd "M-/") 'hippie-expand)
+;; (global-set-key [(control ?.)] 'goto-last-change)
+;; (global-set-key [(control ?,)] 'goto-last-change-reverse)
+(global-set-key (kbd "<down>") (ignore-error-wrapper 'windmove-down))
+(global-set-key (kbd "<up>") (ignore-error-wrapper 'windmove-up))
+(global-set-key (kbd "<left>") (ignore-error-wrapper 'windmove-left))
+(global-set-key (kbd "<right>") (ignore-error-wrapper 'windmove-right))
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
@@ -332,8 +385,9 @@ This functions should be added to the hooks of major modes for programming."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
- '(debug-on-error t)
+ '(custom-safe-themes
+   (quote
+    ("af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
@@ -349,8 +403,12 @@ This functions should be added to the hooks of major modes for programming."
  '(diff-removed ((t (:inherit diff-changed :foreground "#ff0000"))))
  '(erb-face ((t nil)))
  '(erb-out-delim-face ((t (:foreground "#aaffff"))))
+ '(error ((t (:foreground "pink2" :underline nil :weight normal))))
  '(magit-diff-add ((t (:inherit diff-added :background "#3c3c35"))))
  '(magit-diff-del ((t (:inherit diff-removed :background "#3c3c35"))))
- '(magit-item-highlight ((t (:background "#3c3c35")))))
+ '(magit-item-highlight ((t (:background "#3c3c35"))))
+ '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
+ '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
+ '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal)))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

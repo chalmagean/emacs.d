@@ -23,6 +23,8 @@
 (require 'surround)
 (global-surround-mode 1)
 
+(require 'evil-visualstar)
+(require 'evil-jumper)
 ;; Don't wait for any other keys after escape is pressed.
 (setq evil-esc-delay 0)
 
@@ -50,17 +52,20 @@
 (evil-add-hjkl-bindings occur-mode 'emacs)
 
 ;; Evil Keys
-(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(define-key evil-normal-state-map (kbd "C-v") 'evil-scroll-down)
+;;(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+;;(define-key evil-normal-state-map (kbd "C-v") 'evil-scroll-down)
+(define-key evil-normal-state-map (kbd "-") 'split-window-vertically)
+(define-key evil-normal-state-map (kbd "|") 'split-window-horizontally)
+(define-key evil-normal-state-map (kbd "C-c") 'kill-buffer-and-window)
 (evil-leader/set-leader "<SPC>")
 (evil-leader/set-key
   "w" 'save-buffer
   "a" 'ack-and-a-half
-  "g" 'magit
+  "g" 'magit-status
   "j" 'dired-jump
   "<SPC>" 'evil-buffer
-  "f" 'find-file
-  "F" 'fiplr-find-file
+  "F" 'find-file
+  "f" 'projectile-find-file
   "b" 'bs-show
   "B" 'ibuffer
   "x" 'execute-extended-command
@@ -81,6 +86,15 @@
 (evil-declare-key 'normal rspec-mode-map (kbd ",sg") 'rspec-toggle-spec-and-target)
 
 ;;; esc quits
+(defun minibuffer-keyboard-quit ()
+  "Abort recursive edit.
+In Delete Selection mode, if the mark is active, just deactivate it;
+then it takes a second \\[keyboard-quit] to abort the minibuffer."
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark  t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
 (define-key evil-visual-state-map [escape] 'keyboard-quit)
 (define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
@@ -88,3 +102,8 @@
 (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+
+(define-key evil-normal-state-map (kbd "<down>")  'windmove-down)
+(define-key evil-normal-state-map (kbd "<up>")  'windmove-up)
+(define-key evil-normal-state-map (kbd "<left>")  'windmove-left)
+(define-key evil-normal-state-map (kbd "<right>")  'windmove-right)

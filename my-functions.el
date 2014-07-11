@@ -178,3 +178,16 @@ LIST defaults to all existing live buffers."
   (let ((current-branch-name (magit-get-current-branch)))
     (progn (string-match "\\([0-9]+\\)" current-branch-name)
            (insert (concat "[#" (match-string 1 current-branch-name) "] ")))))
+
+(defun ignore-error-wrapper (fn)
+  "Funtion return new function that ignore errors.
+   The function wraps a function with `ignore-errors' macro."
+  (lexical-let ((fn fn))
+    (lambda ()
+      (interactive)
+      (ignore-errors
+        (funcall fn)))))
+
+(add-hook 'isearch-mode-end-hook 'my-goto-match-beginning)
+(defun my-goto-match-beginning ()
+    (when (and isearch-forward (not isearch-mode-end-hook-quit)) (goto-char isearch-other-end)))
