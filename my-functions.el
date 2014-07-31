@@ -188,6 +188,3 @@ LIST defaults to all existing live buffers."
       (ignore-errors
         (funcall fn)))))
 
-(add-hook 'isearch-mode-end-hook 'my-goto-match-beginning)
-(defun my-goto-match-beginning ()
-    (when (and isearch-forward (not isearch-mode-end-hook-quit)) (goto-char isearch-other-end)))
