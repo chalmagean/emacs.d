@@ -15,6 +15,15 @@
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
 
+;; Hide some files
+(setq dired-omit-files "^\\..*$\\|^\\.\\.$")
+(setq dired-omit-mode t)
+
+;; Use ls from emacs
+(when (eq system-type 'darwin)
+  (require 'ls-lisp)
+  (setq ls-lisp-use-insert-directory-program nil))
+
 ;; Changing the way M-< and M-> work in dired
 ;; Instead of taking me to the very beginning or very end, they now take me to the first or last file.
 (defun dired-back-to-top ()

@@ -1,10 +1,3 @@
-(setq inhibit-startup-message t)
-
-(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
-(setq exec-path (append exec-path '("/usr/local/bin")))
-
-;; Adding folders to the load path
-;;(add-to-list 'load-path "~/.emacs.d/")
 (add-to-list 'load-path "~/.emacs.d/vendor/")
 
 ;; Default to home dir
@@ -21,13 +14,20 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            'evil
-            'evil-jumper
-            'evil-visualstar
-            'surround
+            ;; 'evil
+            ;; 'evil-tabs
+            ;; 'evil-jumper
+            ;; 'evil-visualstar
+            ;; 'evil-search-highlight-persist
+            ;; 'surround
+            ;; 'powerline-evil
+            'visual-regexp
+            'visual-regexp-steroids
             'robe
             's
             'coffee-mode
+            'ag
+            'git-timemachine
             'sourcemap
             'bundler
             'projectile
@@ -37,12 +37,11 @@
             'sass-mode
             'f
             'jump
-            'inflections
+            'discover
             'fiplr
             'ack-and-a-half
             'ruby-tools
-            'highlight-indentation
-            'window-number
+            'magit-gh-pulls
             'rhtml-mode
             'dired-details
             'yasnippet
@@ -56,23 +55,62 @@
             'auto-compile
             'yaml-mode
             'rspec-mode
+            'expand-region
             'undo-tree
             'inf-ruby
-            'discover-my-major
-            'goto-chg))
+            'smartscan                          ;; Quickly jumps between other symbols found at point in Emacs
+            ;; 'discover-my-major
+            'goto-chg
+            ))
 
 (dolist (package my-required-packages)
   (when (not (package-installed-p package))
     (package-refresh-contents)
     (package-install package)))
 
-;; Window numbers
-(require 'window-number)
-(window-number-mode)
-(window-number-meta-mode)
+;; for smooth scrolling and disabling the automatical recentering of emacs when moving the cursor
+(setq scroll-margin 1
+      scroll-conservatively 0)
+(setq-default scroll-up-aggressively 0.01
+              scroll-down-aggressively 0.01)
+
+;; Disable the scroll bar
+(scroll-bar-mode 0)
+
+;; Expand region
+(require 'expand-region)
+
+;; Enable accents in GUI
+(require 'iso-transl)
+
+;; Enable SmartScan
+(smartscan-mode 1)
+
+;; No splash screen
+(setq inhibit-startup-screen t)
+
+;; Magit GH pulls
+(eval-after-load 'magit
+  '(define-key magit-mode-map "#gg"
+     'endless/load-gh-pulls-mode))
+
+(defun endless/load-gh-pulls-mode ()
+  "Start `magit-gh-pulls-mode' only after a manual request."
+  (interactive)
+  (require 'magit-gh-pulls)
+  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
+  (magit-gh-pulls-mode 1)
+  (magit-gh-pulls-reload))
 
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
+
+;; Disable the menu
+(menu-bar-mode 1)
+
+;; Enable IDO
+(ido-mode 1)
+(setq ido-enable-flex-matching t)
 
 ;; To get rid of Weird color escape sequences in Emacs.
 ;; Instruct Emacs to use emacs term-info not system term info
@@ -86,9 +124,9 @@
 (require 'goto-chg)
 
 ;; Highlight 80 column margin
-(require 'fill-column-indicator)
-(setq fci-rule-use-dashes nil)
-(setq fci-always-use-textual-rule nil)
+;; (require 'fill-column-indicator)
+;; (setq fci-rule-use-dashes nil)
+;; (setq fci-always-use-textual-rule nil)
 
 ;; Web mode
 (require 'web-mode)
@@ -101,6 +139,18 @@
   (delete-file (plist-get props :sourcemap)))
 (add-hook 'coffee-after-compile-hook 'coffee-after-compile-delete-file t)
 
+;; Load the PATH
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs' `exec-path' and PATH environment variable to match that used by the user's shell.
+
+This is particularly useful under Mac OSX, where GUI apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string "[ \t\n]*$" "" (shell-command-to-string "$SHELL --login -i -c 'echo $PATH'"))))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(set-exec-path-from-shell-PATH)
+
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
@@ -112,7 +162,7 @@
 (setq split-width-threshold nil)
 
 ;; Stop that bell sound
-(setq visible-bell t)
+(setq visible-bell nil)
 (setq ring-bell-function (lambda () (message "*beep*")))
 
 ;; Yaml
@@ -162,8 +212,10 @@
  (lambda (face)
    (set-face-attribute face nil :weight 'normal :underline nil))
  (face-list))
+(set-face-attribute 'default nil :background "black" :foreground "gray"
+  :font "Monaco-13" :height 130)
 
-;; Showing whitespace
+;; ;; Showing whitespace
 (require 'whitespace)
 (setq whitespace-line-column 80) ;; limit line length
 (setq whitespace-style '(face lines-tail))
@@ -180,8 +232,6 @@
 ;; Setting a default line-height
 (setq-default line-spacing 1)
 
-;; Make _ parts of the "word"
-(modify-syntax-entry ?_ "w")
 
 ;; Don't save any backup files in the current directory
 (setq backup-directory-alist `(("." . "~/.emacs_backups")))
@@ -204,13 +254,16 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Evil stuff
-(load "~/.emacs.d/my-evil")
+;; (load "~/.emacs.d/my-evil")
 
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
 ;; (setq mac-option-modifier 'none)
 ;; (setq mac-option-key-is-meta t)
 ;; (setq mac-right-option-modifier nil)
+
+;; SRGB support
+(setq ns-use-srgb-colorspace t)
 
 ;; Choosing a dark theme
 ;; (load-theme 'base16-default t)
@@ -219,7 +272,7 @@
 
 ;; Default frame size
 (setq initial-frame-alist
-      '((top . 10) (left . 30) (width . 125) (height . 35)))
+      '((top . 10) (left . 50) (width . 185) (height . 55)))
    
 ;; Making dabbrev a bit nicer
 (setq dabbrev-abbrev-skip-leading-regexp ":")
@@ -230,19 +283,33 @@
 
 ;; Show line numbers only in opened files
 ;; Another option could be: http://www.emacswiki.org/emacs/linum-off.el
-(add-hook 'find-file-hook (lambda () (linum-mode 1)))
+;; (add-hook 'find-file-hook (lambda () (linum-mode 1)))
 
 ;; Format line numbers
 (setq linum-format "%4d ")
 
-;; Disabling the fringe
-(fringe-mode 0)
+;; M-f should move to the beginning of the next word
+(require 'misc)
+
+;; Turn on the left fringe
+(set-fringe-mode '(10 . 0)) ;; 10px left, 0px right
+
+;; Remove the fringe indicators
+(when (boundp 'fringe-indicator-alist)
+  (setq-default fringe-indicator-alist
+		'(
+		  (continuation . nil)
+		  (overlay-arrow . nil)
+		  (up . nil)
+		  (down . nil)
+		  (top . nil)
+		  (bottom . nil)
+		  (top-bottom . nil)
+		  (empty-line . nil)
+		  (unknown . nil))))
 
 ;; Disabling the toolbar
 (tool-bar-mode 0)
-
-;; Font
-(set-frame-font "Monaco-13")
 
 ;; IBuffer
 (setq ibuffer-formats
@@ -274,6 +341,10 @@
 ;; Bind YARI to C-h R
 (define-key 'help-command "R" 'yari)
 
+;; Discover mode
+(require 'discover)
+(global-discover-mode 1)
+
 ;; RVM
 (require 'rvm)
 (rvm-use-default)
@@ -302,19 +373,6 @@
 (setq ack-and-a-half-prompt-for-directory t)
 (setq ack-and-a-half-executable "/usr/local/bin/ack")
 
-(defun font-lock-comment-annotations ()
-  "Highlight a bunch of well known comment annotations.
-
-This functions should be added to the hooks of major modes for programming."
-  (font-lock-add-keywords
-   nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):"
-          1 font-lock-warning-face t))))
-
-(require 'highlight-symbol)
-(global-set-key (kbd "C-8") 'highlight-symbol-next)
-(global-set-key (kbd "C-*") 'highlight-symbol-prev)
-
-(add-hook 'prog-mode-hook 'font-lock-comment-annotations)
 (defun prelude-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
@@ -345,29 +403,33 @@ point reaches the beginning or end of the buffer, stop there."
   "Opens the init.el file"
  (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
-                                          
+
+;; Key bindings
+(global-set-key (kbd "M-f") 'forward-to-word)
+(global-set-key (kbd "M-F") 'forward-word)
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
+(global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+(global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-;; (global-unset-key (kbd "C-c C-x"))
-;; (global-set-key (kbd "C-c C-x") 'execute-extended-command)
-;; (global-set-key (kbd "C-c C-a") 'ack-and-a-half)
-;; (global-set-key (kbd "C-x b") 'bs-show) 
-;; (global-set-key (kbd "C-c j") 'dired-jump)
-;; (global-set-key (kbd "C-c d") 'duplicate-line)
-;; (global-set-key (kbd "C-c g") 'magit-status)
-;; (global-set-key (kbd "C-x k") 'kill-this-buffer)
-;; (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
-;; (global-set-key (kbd "C-c o") 'vi-open-line-below)
-;; (global-set-key (kbd "C-=") 'er/expand-region)
-;; (global-set-key (kbd "C-c O") 'vi-open-line-above)
-;; (global-set-key (kbd "C-c r") 'rspec-verify-single)
-;; (global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
-;; (global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
-;; (global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
-;; (global-set-key (kbd "M-/") 'hippie-expand)
-;; (global-set-key [(control ?.)] 'goto-last-change)
-;; (global-set-key [(control ?,)] 'goto-last-change-reverse)
+(global-unset-key (kbd "C-c C-x"))
+(global-set-key (kbd "C-c C-x") 'execute-extended-command)
+(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+(global-set-key (kbd "C-c j") 'dired-jump)
+(global-set-key (kbd "C-c d") 'duplicate-line)
+(global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(global-set-key (kbd "C-c K") 'kill-buffer-and-window)
+(global-set-key (kbd "C-c o") 'vi-open-line-below)
+(global-set-key (kbd "C-=") 'er/expand-region)
+(global-set-key (kbd "C-c O") 'vi-open-line-above)
+(global-set-key (kbd "C-c r") 'rspec-verify-single)
+(global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
+(global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
+(global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
+(global-set-key (kbd "M-/") 'hippie-expand)
+(global-set-key [(control ?.)] 'goto-last-change)
+(global-set-key [(control ?,)] 'goto-last-change-reverse)
 (global-set-key (kbd "<down>") (ignore-error-wrapper 'windmove-down))
 (global-set-key (kbd "<up>") (ignore-error-wrapper 'windmove-up))
 (global-set-key (kbd "<left>") (ignore-error-wrapper 'windmove-left))
@@ -392,6 +454,7 @@ point reaches the beginning or end of the buffer, stop there."
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
+ '(rspec-use-spring-when-possible t)
  '(scss-compile-at-save nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -399,16 +462,16 @@ point reaches the beginning or end of the buffer, stop there."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
- '(diff-context ((t (:background "#3c3c35" :foreground "#666666"))))
- '(diff-removed ((t (:inherit diff-changed :foreground "#ff0000"))))
+ '(diff-removed ((t (:inherit diff-changed :foreground "tomato"))))
  '(erb-face ((t nil)))
  '(erb-out-delim-face ((t (:foreground "#aaffff"))))
  '(error ((t (:foreground "pink2" :underline nil :weight normal))))
- '(magit-diff-add ((t (:inherit diff-added :background "#3c3c35"))))
- '(magit-diff-del ((t (:inherit diff-removed :background "#3c3c35"))))
- '(magit-item-highlight ((t (:background "#3c3c35"))))
+ '(fringe ((t (:background "gray6"))))
+ '(magit-item-highlight ((t nil)))
+ '(vertical-border ((((type tty)) (:inherit gray9))))
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
  '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
- '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal)))))
+ '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal))))
+)
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

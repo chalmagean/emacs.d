@@ -8,3 +8,6 @@ bookmarks
 var/
 projectile*
 *.dat
+/places
+/mng-positions.el
+/backups/

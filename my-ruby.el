@@ -17,21 +17,12 @@
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 (setq projectile-completion-system 'grizzl)
-(add-hook 'ruby-mode-hook 'robe-mode)
+;;(add-hook 'ruby-mode-hook 'robe-mode)
 
 (define-key inf-ruby-minor-mode-map (kbd "C-c C-x") nil)
 
+;; Make _ parts of the "word"
+(modify-syntax-entry ?_ "w" ruby-mode-syntax-table)
+
 ;; Rubocop
-(require 'rubocop)
-
-(defun ruby-interpolate ()
-  "In a double quoted string, interpolate."
-  (interactive)
-  (insert "#")
-  (when (and
-         (looking-back "\".*")
-         (looking-at ".*\""))
-    (insert "{}")
-    (backward-char 1)))
-
-;;(define-key ruby-mode-map (kbd "C-c #") 'ruby-interpolate)
+;; (require 'rubocop)

@@ -1,4 +1,5 @@
 ;; enable evil leader
+(setq evil-leader/in-all-states 1)
 (global-evil-leader-mode)
 
 (setq evil-shift-width 2)
@@ -10,6 +11,7 @@
 (evil-mode 1)
 (setq evil-default-cursor t)
 (set-cursor-color "DarkCyan")
+(global-evil-tabs-mode t)
 
 ;; Clear insert state bindings.
 ;; (setcdr evil-insert-state-map nil)
@@ -51,19 +53,23 @@
 (evil-add-hjkl-bindings magit-commit-mode-map 'emacs)
 (evil-add-hjkl-bindings occur-mode 'emacs)
 
+(require 'evil-search-highlight-persist)
+(global-evil-search-highlight-persist t)
+
 ;; Evil Keys
-;;(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
 ;;(define-key evil-normal-state-map (kbd "C-v") 'evil-scroll-down)
 (define-key evil-normal-state-map (kbd "-") 'split-window-vertically)
 (define-key evil-normal-state-map (kbd "|") 'split-window-horizontally)
 (define-key evil-normal-state-map (kbd "C-c") 'kill-buffer-and-window)
-(evil-leader/set-leader "<SPC>")
+(evil-leader/set-leader "SPC")
 (evil-leader/set-key
   "w" 'save-buffer
+  "h" 'evil-search-highlight-persist-remove-all
   "a" 'ack-and-a-half
   "g" 'magit-status
   "j" 'dired-jump
-  "<SPC>" 'evil-buffer
+  "SPC" 'evil-buffer
   "F" 'find-file
   "f" 'projectile-find-file
   "b" 'bs-show
@@ -103,7 +109,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
 
-(define-key evil-normal-state-map (kbd "<down>")  'windmove-down)
-(define-key evil-normal-state-map (kbd "<up>")  'windmove-up)
-(define-key evil-normal-state-map (kbd "<left>")  'windmove-left)
-(define-key evil-normal-state-map (kbd "<right>")  'windmove-right)
+(define-key evil-normal-state-map (kbd "<C-j>")  'windmove-down)
+(define-key evil-normal-state-map (kbd "<C-k>")  'windmove-up)
+(define-key evil-normal-state-map (kbd "<C-h>")  'windmove-left)
+(define-key evil-normal-state-map (kbd "<C-l>")  'windmove-right)

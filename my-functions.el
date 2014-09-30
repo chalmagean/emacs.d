@@ -169,10 +169,6 @@ LIST defaults to all existing live buffers."
 ;; Load the tags file without asking
 (setq tags-revert-without-query 1)
 
-(defadvice split-window (after move-point-to-new-window activate)
-  "Moves the point to the newly created window after splitting."
-  (other-window 1))
-
 (defun git-extract-number-from-branch-name ()
   (interactive)
   (let ((current-branch-name (magit-get-current-branch)))
