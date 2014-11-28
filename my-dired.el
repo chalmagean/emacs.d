@@ -19,6 +19,20 @@
 (setq dired-omit-files "^\\..*$\\|^\\.\\.$")
 (setq dired-omit-mode t)
 
+
+(defun sof/dired-sort ()
+  "Dired sort hook to list directories first."
+  (save-excursion
+   (let (buffer-read-only)
+     (forward-line 2) ;; beyond dir. header  
+     (sort-regexp-fields t "^.*$" "[ ]*." (point) (point-max))))
+  (and (featurep 'xemacs)
+       (fboundp 'dired-insert-set-properties)
+       (dired-insert-set-properties (point-min) (point-max)))
+  (set-buffer-modified-p nil))
+
+(add-hook 'dired-after-readin-hook 'sof/dired-sort)
+
 ;; Use ls from emacs
 (when (eq system-type 'darwin)
   (require 'ls-lisp)

@@ -22,7 +22,9 @@
             ;; 'surround
             ;; 'powerline-evil
             'visual-regexp
+            'buffer-move ;; used for rotating buffers
             'visual-regexp-steroids
+            'yafolding
             'robe
             's
             'coffee-mode
@@ -40,7 +42,13 @@
             'discover
             'fiplr
             'ack-and-a-half
+            'yard-mode ;; fontification in ruby comments
             'ruby-tools
+            'persp-projectile
+            'ruby-block
+            'ruby-additional
+            'ruby-hash-syntax
+            'ruby-refactor
             'magit-gh-pulls
             'rhtml-mode
             'dired-details
@@ -53,6 +61,7 @@
             'web-mode
             'feature-mode
             'auto-compile
+            'company
             'yaml-mode
             'rspec-mode
             'expand-region
@@ -77,6 +86,10 @@
 ;; Disable the scroll bar
 (scroll-bar-mode 0)
 
+;; Company mode
+(require 'company)
+(global-company-mode t)
+
 ;; Expand region
 (require 'expand-region)
 
@@ -88,6 +101,9 @@
 
 ;; No splash screen
 (setq inhibit-startup-screen t)
+
+;; Don't warn me when opening large files
+(setq large-file-warning-threshold nil)
 
 ;; Magit GH pulls
 (eval-after-load 'magit
@@ -109,8 +125,7 @@
 (menu-bar-mode 1)
 
 ;; Enable IDO
-(ido-mode 1)
-(setq ido-enable-flex-matching t)
+(load "~/.emacs.d/my-ido.el")
 
 ;; To get rid of Weird color escape sequences in Emacs.
 ;; Instruct Emacs to use emacs term-info not system term info
@@ -121,12 +136,7 @@
 (prefer-coding-system 'utf-8)
 
 ;; Go to last change
-(require 'goto-chg)
 
-;; Highlight 80 column margin
-;; (require 'fill-column-indicator)
-;; (setq fci-rule-use-dashes nil)
-;; (setq fci-always-use-textual-rule nil)
 
 ;; Web mode
 (require 'web-mode)
@@ -169,19 +179,20 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
-;; Projectile mode
-(require 'projectile)
-(projectile-global-mode)
-(add-hook 'projectile-mode-hook 'projectile-rails-on)
-
 ;; Load custom snippets
 (require 'yasnippet)
 (yas-global-mode 1)
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
 
 ;; BS mode
-(setq bs-must-show-regexp "^\\*scratch*")
-(setq bs-dont-show-regexp "TAGS")
+(require 'bs)
+(add-to-list 'bs-configurations                             ; Create a new buffer list config
+             '("default" "\\*scratch\\*\\|\\*eshell\\*" nil ; show scratch, and eshell
+               "TAGS"                                       ; don't show the TAGS file
+               bs-visits-non-file                           ; only show files
+               bs--sort-by-name))                           ; sort the buffer list by name
+(setq bs-default-configuration "default")
+
 (setq bs-attributes-list 
       '(("" 1 1 left bs--get-marked-string)
         ("M" 1 1 left bs--get-modified-string)
@@ -208,12 +219,13 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (global-auto-revert-mode 1)
 
 ;; Diable bold and underline faces
-(mapc
- (lambda (face)
-   (set-face-attribute face nil :weight 'normal :underline nil))
- (face-list))
-(set-face-attribute 'default nil :background "black" :foreground "gray"
-  :font "Monaco-13" :height 130)
+(when (display-graphic-p)
+  (mapc
+   (lambda (face)
+     (set-face-attribute face nil :weight 'normal :underline nil))
+   (face-list))
+  (set-face-attribute 'default nil :background "black" :foreground "gray"
+                      :font "Monaco-13" :height 130))
 
 ;; ;; Showing whitespace
 (require 'whitespace)
@@ -227,7 +239,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
         (newline-mark 10 [172 10]) ; 10 LINE FEED
         (tab-mark 9 [183 9] [92 9]) ; 9 TAB, MIDDLE DOT
         ))
-(global-whitespace-mode -1)
+(global-whitespace-mode 1)
 
 ;; Setting a default line-height
 (setq-default line-spacing 1)
@@ -408,22 +420,23 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-word)
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
+(global-set-key (kbd "C-x C-5") 'toggle-frame-split)
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
 (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-unset-key (kbd "C-c C-x"))
 (global-set-key (kbd "C-c C-x") 'execute-extended-command)
 (global-set-key (kbd "C-c C-a") 'ack-and-a-half)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
 (global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-c w") 'fixup-whitespace)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
 (global-set-key (kbd "C-=") 'er/expand-region)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
-(global-set-key (kbd "C-c r") 'rspec-verify-single)
 (global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
 (global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
 (global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
@@ -454,6 +467,7 @@ point reaches the beginning or end of the buffer, stop there."
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
+ '(make-backup-files nil)
  '(rspec-use-spring-when-possible t)
  '(scss-compile-at-save nil))
 (custom-set-faces
@@ -472,6 +486,6 @@ point reaches the beginning or end of the buffer, stop there."
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
  '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
  '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal))))
-)
+ '(whitespace-newline ((t (:foreground "#3f3f3f" :weight thin)))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

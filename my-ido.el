@@ -1,7 +1,7 @@
 ;; Ido
 (require 'ido) ;; loading a newer version which fixes flex matching
 (require 'ido-hacks)
-(ido-mode)
+(ido-mode 1)
 
 (setq ido-enable-prefix nil
       ido-enable-flex-matching t
@@ -40,6 +40,3 @@
 
 ;; Ignore .DS_Store files with ido mode
 (add-to-list 'ido-ignore-files "\\.DS_Store")
-
-;; disable ido faces to see flx highlights.
-(setq ido-use-faces nil)

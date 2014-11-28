@@ -59,8 +59,19 @@
 ;; Evil Keys
 (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
 ;;(define-key evil-normal-state-map (kbd "C-v") 'evil-scroll-down)
-(define-key evil-normal-state-map (kbd "-") 'split-window-vertically)
-(define-key evil-normal-state-map (kbd "|") 'split-window-horizontally)
+
+;; Split and move the cursor to the new split
+(define-key evil-normal-state-map (kbd "-")
+  (lambda ()
+    (interactive)
+    (split-window-vertically)
+    (other-window 1)))
+(define-key evil-normal-state-map (kbd "|")
+  (lambda ()
+    (interactive)
+    (split-window-horizontally)
+    (other-window 1)))
+
 (define-key evil-normal-state-map (kbd "C-c") 'kill-buffer-and-window)
 (evil-leader/set-leader "SPC")
 (evil-leader/set-key
@@ -109,7 +120,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
 
-(define-key evil-normal-state-map (kbd "<C-j>")  'windmove-down)
-(define-key evil-normal-state-map (kbd "<C-k>")  'windmove-up)
-(define-key evil-normal-state-map (kbd "<C-h>")  'windmove-left)
-(define-key evil-normal-state-map (kbd "<C-l>")  'windmove-right)
+(define-key evil-normal-state-map "\C-j"  'evil-window-down)
+(define-key evil-normal-state-map "\C-k"  'evil-window-up)
+(define-key evil-normal-state-map "\C-h"  'evil-window-left)
+(define-key evil-normal-state-map "\C-l"  'evil-window-right)
