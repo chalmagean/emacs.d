@@ -416,6 +416,18 @@ point reaches the beginning or end of the buffer, stop there."
  (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
 
+;; all buffers, try to reuse windows across all frames
+(add-to-list 'display-buffer-alist
+           '(".*". (display-buffer-reuse-window .
+                                  ((reusable-frames . t)))))
+
+;; except for compilation buffers where you want new and dedicated frames when necessary
+(add-to-list 'display-buffer-alist
+         '("^\\*Compile-Log\\*". ((display-buffer-reuse-window
+                                   display-buffer-pop-up-frame) .
+                                  ((reusable-frames . t)
+                                   (inhibit-same-window . t)))))
+
 ;; Key bindings
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-word)
@@ -440,6 +452,8 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
 (global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
 (global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
+(global-set-key (kbd "C-c , s") 'rspec-verify-single)
+(global-set-key (kbd "C-c , r") 'rspec-rerun)
 (global-set-key (kbd "M-/") 'hippie-expand)
 (global-set-key [(control ?.)] 'goto-last-change)
 (global-set-key [(control ?,)] 'goto-last-change-reverse)
@@ -447,6 +461,7 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "<up>") (ignore-error-wrapper 'windmove-up))
 (global-set-key (kbd "<left>") (ignore-error-wrapper 'windmove-left))
 (global-set-key (kbd "<right>") (ignore-error-wrapper 'windmove-right))
+(define-key isearch-mode-map (kbd "C-<return>") 'isearch-exit-other-end)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
@@ -462,12 +477,14 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+    ("6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
  '(make-backup-files nil)
+ '(rspec-spec-command "spring rspec")
+ '(rspec-use-bundler-when-possible nil)
  '(rspec-use-spring-when-possible t)
  '(scss-compile-at-save nil))
 (custom-set-faces
