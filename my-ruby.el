@@ -17,13 +17,25 @@
 (require 'projectile)
 (projectile-global-mode)
 (setq projectile-completion-system 'grizzl)
-(persp-mode)
 (require 'persp-projectile)
+(persp-mode)
 (define-key projectile-mode-map (kbd "s-s") 'projectile-persp-switch-project)
+(helm-projectile-on)
+
+;; Populate the `magit-repo-dirs` variable with the .git projects you
+;; visited so that when you hit C-u M-x git-status you can choose to
+;; open one of those repos
+(eval-after-load "projectile"
+  '(progn (setq magit-repo-dirs (mapcar (lambda (dir)
+                                          (substring dir 0 -1))
+                                        (remove-if-not (lambda (project)
+                                                         (file-directory-p (concat project "/.git/")))
+                                                       (projectile-relevant-known-projects)))
+
+                magit-repo-dirs-depth 1)))
+
 (require 'robe)
 
-;; Auto completion with company mode
-(push 'company-robe company-backends)
 (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate)
   (rvm-activate-corresponding-ruby))
 
@@ -35,10 +47,15 @@
 (require 'ruby-additional)
 (require 'ruby-block)
 (ruby-block-mode t)
+(require 'ruby-tools)
 (require 'yard-mode)
 (require 'rspec-mode)
 (require 'eldoc)
 (require 'rubocop)
+
+;; Bind YARI to C-h R
+(require 'yari)
+(define-key 'help-command "R" 'yari)
 
 (add-hook 'ruby-mode-hook 'eldoc-mode)
 (add-hook 'after-init-hook 'inf-ruby-switch-setup)

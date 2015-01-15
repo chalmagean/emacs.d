@@ -6,9 +6,8 @@
 ;; Using MELPA for packages
 (when (>= emacs-major-version 24)
   (require 'package)
-  (package-initialize)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
-  )
+  (when (>= emacs-major-version 24)
+    (setq package-archives '(("melpa" . "http://melpa.org/packages/")))))
 
 ;; Load necessary packages
 (package-initialize)
@@ -21,9 +20,11 @@
             ;; 'evil-search-highlight-persist
             ;; 'surround
             ;; 'powerline-evil
+            'exec-path-from-shell
             'visual-regexp
             'buffer-move ;; used for rotating buffers
             'visual-regexp-steroids
+            'ido-vertical-mode
             'yafolding
             'robe
             's
@@ -34,6 +35,9 @@
             'bundler
             'projectile
             'projectile-rails
+            'helm-ack
+            'helm-projectile
+            'helm-robe
             'rubocop
             'scss-mode
             'sass-mode
@@ -41,7 +45,7 @@
             'jump
             'discover
             'fiplr
-            'ack-and-a-half
+            ;;'ack-and-a-half
             'yard-mode ;; fontification in ruby comments
             'ruby-tools
             'persp-projectile
@@ -61,14 +65,13 @@
             'web-mode
             'feature-mode
             'auto-compile
-            'company
             'yaml-mode
             'rspec-mode
             'expand-region
             'undo-tree
             'inf-ruby
             'smartscan                          ;; Quickly jumps between other symbols found at point in Emacs
-            ;; 'discover-my-major
+            'discover-my-major
             'goto-chg
             ))
 
@@ -76,6 +79,14 @@
   (when (not (package-installed-p package))
     (package-refresh-contents)
     (package-install package)))
+
+;; Set PATH, MANPATH and exec-path
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
+
+;; Emacs's version of `tail -f`
+;; or you can use M-x auto-revert-tail-mode
+(add-to-list 'auto-mode-alist '("\\.log\\'" . auto-revert-mode))
 
 ;; for smooth scrolling and disabling the automatical recentering of emacs when moving the cursor
 (setq scroll-margin 1
@@ -85,10 +96,6 @@
 
 ;; Disable the scroll bar
 (scroll-bar-mode 0)
-
-;; Company mode
-(require 'company)
-(global-company-mode t)
 
 ;; Expand region
 (require 'expand-region)
@@ -122,7 +129,7 @@
 (setq x-select-enable-clipboard t)
 
 ;; Disable the menu
-(menu-bar-mode 1)
+(menu-bar-mode 0)
 
 ;; Enable IDO
 (load "~/.emacs.d/my-ido.el")
@@ -136,11 +143,12 @@
 (prefer-coding-system 'utf-8)
 
 ;; Go to last change
-
+(require 'goto-chg)
 
 ;; Web mode
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(setq web-mode-markup-indent-offset 2)
 
 ;; Coffee Script
 (setq coffee-args-compile '("-c" "-m")) ;; generating sourcemap
@@ -149,20 +157,12 @@
   (delete-file (plist-get props :sourcemap)))
 (add-hook 'coffee-after-compile-hook 'coffee-after-compile-delete-file t)
 
-;; Load the PATH
-(defun set-exec-path-from-shell-PATH ()
-  "Set up Emacs' `exec-path' and PATH environment variable to match that used by the user's shell.
-
-This is particularly useful under Mac OSX, where GUI apps are not started from a shell."
-  (interactive)
-  (let ((path-from-shell (replace-regexp-in-string "[ \t\n]*$" "" (shell-command-to-string "$SHELL --login -i -c 'echo $PATH'"))))
-    (setenv "PATH" path-from-shell)
-    (setq exec-path (split-string path-from-shell path-separator))))
-
-(set-exec-path-from-shell-PATH)
-
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+;; Choosing a dark theme
+;; (load-theme 'base16-default t)
+;; (load-theme 'tango-dark t)
+(load-theme 'wilson t)
 
 ;; Prevent adding the coding line
 (setq ruby-insert-encoding-magic-comment nil)
@@ -183,24 +183,6 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (require 'yasnippet)
 (yas-global-mode 1)
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
-
-;; BS mode
-(require 'bs)
-(add-to-list 'bs-configurations                             ; Create a new buffer list config
-             '("default" "\\*scratch\\*\\|\\*eshell\\*" nil ; show scratch, and eshell
-               "TAGS"                                       ; don't show the TAGS file
-               bs-visits-non-file                           ; only show files
-               bs--sort-by-name))                           ; sort the buffer list by name
-(setq bs-default-configuration "default")
-
-(setq bs-attributes-list 
-      '(("" 1 1 left bs--get-marked-string)
-        ("M" 1 1 left bs--get-modified-string)
-        ("R" 2 2 left bs--get-readonly-string)
-        ("Buffer" bs--get-name-length 10 left bs--get-name)
-        ("" 1 1 left " ")
-        ("File" 12 12 left bs--get-file-name)
-        ("" 2 2 left "  ")))
 
 ;; Always ident with 2 spaces
 (setq-default indent-tabs-mode nil)
@@ -224,8 +206,9 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
    (lambda (face)
      (set-face-attribute face nil :weight 'normal :underline nil))
    (face-list))
-  (set-face-attribute 'default nil :background "black" :foreground "gray"
-                      :font "Monaco-13" :height 130))
+  (menu-bar-mode 1)
+  (set-face-attribute 'default nil :foreground "gray" :font "Inconsolata-13" :height 155)
+  )
 
 ;; ;; Showing whitespace
 (require 'whitespace)
@@ -244,9 +227,11 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 ;; Setting a default line-height
 (setq-default line-spacing 1)
 
-
-;; Don't save any backup files in the current directory
-(setq backup-directory-alist `(("." . "~/.emacs_backups")))
+;; store all backup and autosave files in the tmp dir
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
 
 ;; Highlight parenthesis
 (show-paren-mode 1)
@@ -268,6 +253,9 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 ;; Evil stuff
 ;; (load "~/.emacs.d/my-evil")
 
+;; Hide the modeline
+(load "~/.emacs.d/hidden-mode-line")
+
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
 ;; (setq mac-option-modifier 'none)
@@ -276,11 +264,6 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 
 ;; SRGB support
 (setq ns-use-srgb-colorspace t)
-
-;; Choosing a dark theme
-;; (load-theme 'base16-default t)
-;; (load-theme 'tango-dark t)
-(load-theme 'wilson t)
 
 ;; Default frame size
 (setq initial-frame-alist
@@ -346,13 +329,6 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 ;; Ruby
 (load "~/.emacs.d/my-ruby")
 
-;; Rhtml mode
-;; (require 'rhtml-mode)
-;; (add-to-list 'auto-mode-alist '("\\.html.erb?\\'" . rhtml-mode))
-
-;; Bind YARI to C-h R
-(define-key 'help-command "R" 'yari)
-
 ;; Discover mode
 (require 'discover)
 (global-discover-mode 1)
@@ -375,15 +351,32 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 
+(defun my-create-non-existent-directory ()
+      (let ((parent-directory (file-name-directory buffer-file-name)))
+        (when (and (not (file-exists-p parent-directory))
+                   (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
+          (make-directory parent-directory t))))
+(add-to-list 'find-file-not-found-functions #'my-create-non-existent-directory)
+
+;; Use bash
+(setq explicit-shell-file-name "/bin/bash")
+(eval-after-load "term"
+  '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+;; Close the terminal buffer on exit
+(defun oleh-term-exec-hook ()
+  (let* ((buff (current-buffer))
+         (proc (get-buffer-process buff)))
+    (set-process-sentinel
+     proc
+     `(lambda (process event)
+        (if (string= event "finished\n")
+            (kill-buffer ,buff))))))
+
+(add-hook 'term-exec-hook 'oleh-term-exec-hook)
+
 ;; Undo tree
 (require 'undo-tree)
 (global-undo-tree-mode 1)
-
-;; Ack
-(require 'ack-and-a-half)
-;; Always prompt for a directory root
-(setq ack-and-a-half-prompt-for-directory t)
-(setq ack-and-a-half-executable "/usr/local/bin/ack")
 
 (defun prelude-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
@@ -431,6 +424,10 @@ point reaches the beginning or end of the buffer, stop there."
 ;; Key bindings
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-word)
+
+(global-set-key (kbd "C-c g x") 'git-extract-number-from-branch-name)
+(global-set-key (kbd "C-c g s") 'magit-status)
+
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
 (global-set-key (kbd "C-x C-5") 'toggle-frame-split)
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
@@ -441,8 +438,7 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c C-a") 'ack-and-a-half)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-set-key (kbd "C-c w") 'fixup-whitespace)
+(global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
@@ -455,6 +451,7 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c , s") 'rspec-verify-single)
 (global-set-key (kbd "C-c , r") 'rspec-rerun)
 (global-set-key (kbd "M-/") 'hippie-expand)
+(global-set-key (kbd "M-<SPC>") 'cycle-spacing)
 (global-set-key [(control ?.)] 'goto-last-change)
 (global-set-key [(control ?,)] 'goto-last-change-reverse)
 (global-set-key (kbd "<down>") (ignore-error-wrapper 'windmove-down))
@@ -477,12 +474,11 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+    ("cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
- '(make-backup-files nil)
  '(rspec-spec-command "spring rspec")
  '(rspec-use-bundler-when-possible nil)
  '(rspec-use-spring-when-possible t)
@@ -494,10 +490,13 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If there is more than one, they won't work right.
  '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
  '(diff-removed ((t (:inherit diff-changed :foreground "tomato"))))
+ '(ediff-even-diff-C ((t nil)))
+ '(ediff-odd-diff-B ((t (:background "dark blue"))))
+ '(ediff-odd-diff-C ((t nil)))
  '(erb-face ((t nil)))
  '(erb-out-delim-face ((t (:foreground "#aaffff"))))
  '(error ((t (:foreground "pink2" :underline nil :weight normal))))
- '(fringe ((t (:background "gray6"))))
+ '(helm-source-header ((t (:background "#22083397778B" :foreground "white"))))
  '(magit-item-highlight ((t nil)))
  '(vertical-border ((((type tty)) (:inherit gray9))))
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))

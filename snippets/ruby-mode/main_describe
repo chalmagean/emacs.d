@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: RSpec.describe
+# key: rdesc
+# --
+RSpec.describe "${1:what you want to test}" do
+         $0
+         end
