@@ -13,53 +13,41 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            ;; 'evil
-            ;; 'evil-tabs
-            ;; 'evil-jumper
-            ;; 'evil-visualstar
-            ;; 'evil-search-highlight-persist
-            ;; 'surround
-            ;; 'powerline-evil
+            'solarized-theme
+            'swiper ;; visual regex search
+            'expand-region
+            'wrap-region
             'exec-path-from-shell
             'visual-regexp
             'buffer-move ;; used for rotating buffers
             'visual-regexp-steroids
             'ido-vertical-mode
             'yafolding
-            'robe
             's
             'coffee-mode
-            'ag
-            'git-timemachine
+            'git-timemachine ;; Walk through git revisions of a file
             'sourcemap
+            'slim-mode
             'bundler
             'projectile
             'projectile-rails
-            'helm-ack
-            'helm-projectile
-            'helm-robe
-            'rubocop
             'scss-mode
             'sass-mode
             'f
             'jump
             'discover
             'fiplr
-            ;;'ack-and-a-half
             'yard-mode ;; fontification in ruby comments
+            'goto-gem ;; Open dired in a gem directory
             'ruby-tools
-            'persp-projectile
             'ruby-block
             'ruby-additional
             'ruby-hash-syntax
             'ruby-refactor
-            'magit-gh-pulls
-            'rhtml-mode
             'dired-details
             'yasnippet
             'yari
             'ibuffer-vc
-            'fill-column-indicator
             'rvm
             'rinari
             'web-mode
@@ -67,12 +55,13 @@
             'auto-compile
             'yaml-mode
             'rspec-mode
-            'expand-region
             'undo-tree
             'inf-ruby
-            'smartscan                          ;; Quickly jumps between other symbols found at point in Emacs
+            'smartscan ;; Quickly jumps between other symbols found at point in Emacs
             'discover-my-major
             'goto-chg
+            'anzu
+            'fullframe
             ))
 
 (dolist (package my-required-packages)
@@ -89,19 +78,29 @@
 (add-to-list 'auto-mode-alist '("\\.log\\'" . auto-revert-mode))
 
 ;; for smooth scrolling and disabling the automatical recentering of emacs when moving the cursor
-(setq scroll-margin 1
-      scroll-conservatively 0)
-(setq-default scroll-up-aggressively 0.01
-              scroll-down-aggressively 0.01)
+(setq scroll-margin 5
+      scroll-preserve-screen-position 1)
+
+;; Display full path in the window title bar
+(setq-default frame-title-format '((:eval (if (buffer-file-name)
+                                              (abbreviate-file-name (buffer-file-name)) "%f"))))
 
 ;; Disable the scroll bar
 (scroll-bar-mode 0)
 
-;; Expand region
-(require 'expand-region)
+(require 'anzu) ;; Shows a count of search matches
+(global-anzu-mode +1)
+(global-set-key (kbd "M-%") 'anzu-query-replace)
+(global-set-key (kbd "C-M-%") 'anzu-query-replace-regexp)
 
-;; Enable accents in GUI
-(require 'iso-transl)
+(require 'iso-transl) ;; Enable accents in GUI
+(require 'goto-chg) ;; Go to last change
+(require 'fullframe)
+(fullframe magit-status magit-mode-quit-window nil)
+(require 'slim-mode)
+
+;; Set fill-column
+(setq-default fill-column 80)
 
 ;; Enable SmartScan
 (smartscan-mode 1)
@@ -112,24 +111,8 @@
 ;; Don't warn me when opening large files
 (setq large-file-warning-threshold nil)
 
-;; Magit GH pulls
-(eval-after-load 'magit
-  '(define-key magit-mode-map "#gg"
-     'endless/load-gh-pulls-mode))
-
-(defun endless/load-gh-pulls-mode ()
-  "Start `magit-gh-pulls-mode' only after a manual request."
-  (interactive)
-  (require 'magit-gh-pulls)
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
-  (magit-gh-pulls-mode 1)
-  (magit-gh-pulls-reload))
-
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
-
-;; Disable the menu
-(menu-bar-mode 0)
 
 ;; Enable IDO
 (load "~/.emacs.d/my-ido.el")
@@ -142,30 +125,40 @@
 ;; Prefer utf-8 encoding
 (prefer-coding-system 'utf-8)
 
-;; Go to last change
-(require 'goto-chg)
+;; Display information about the current function
+(require 'eldoc)
+
+;; Configure hippie-expand
+(defadvice hippie-expand (around hippie-expand-case-fold)
+  "Try to do case-sensitive matching (not effective with all functions)."
+  (let ((case-fold-search nil))
+    ad-do-it))
+(ad-activate 'hippie-expand)
+(setq hippie-expand-try-functions-list
+      '(try-expand-dabbrev
+        try-expand-dabbrev-all-buffers
+        ))
 
 ;; Web mode
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-(setq web-mode-markup-indent-offset 2)
 
 ;; Coffee Script
 (setq coffee-args-compile '("-c" "-m")) ;; generating sourcemap
 (add-hook 'coffee-after-compile-hook 'sourcemap-goto-corresponding-point)
-(defun coffee-after-compile-delete-file (props)
+;; If you want to remove sourcemap file after jumping corresponding point
+(defun my/coffee-after-compile-hook (props)
+  (sourcemap-goto-corresponding-point props)
   (delete-file (plist-get props :sourcemap)))
-(add-hook 'coffee-after-compile-hook 'coffee-after-compile-delete-file t)
+(add-hook 'coffee-after-compile-hook 'my/coffee-after-compile-hook)
 
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 ;; Choosing a dark theme
 ;; (load-theme 'base16-default t)
 ;; (load-theme 'tango-dark t)
-(load-theme 'wilson t)
-
-;; Prevent adding the coding line
-(setq ruby-insert-encoding-magic-comment nil)
+;;(load-theme 'wilson t)
+(load-theme 'solarized-dark t)
 
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
@@ -183,6 +176,8 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
+;; Disable skeletons in projectile-rails
+(setq projectile-rails-expand-snippet nil)
 
 ;; Always ident with 2 spaces
 (setq-default indent-tabs-mode nil)
@@ -190,6 +185,9 @@
 (setq-default c-basic-offset 2)
 (setq css-indent-offset 2)
 (setq js-indent-level 2)
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
 
 ;; Use the short version for yes/no
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -202,19 +200,14 @@
 
 ;; Diable bold and underline faces
 (when (display-graphic-p)
-  (mapc
-   (lambda (face)
-     (set-face-attribute face nil :weight 'normal :underline nil))
-   (face-list))
   (menu-bar-mode 1)
-  (set-face-attribute 'default nil :foreground "gray" :font "Inconsolata-13" :height 155)
-  )
+  (set-face-attribute 'default nil :foreground "gray" :font "Inconsolata-13" :height 155))
 
 ;; ;; Showing whitespace
 (require 'whitespace)
 (setq whitespace-line-column 80) ;; limit line length
-(setq whitespace-style '(face lines-tail))
-(setq whitespace-style (quote (spaces tabs newline space-mark tab-mark newline-mark)))
+;;(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark lines-tail))
+(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark face lines-tail))
 (setq whitespace-display-mappings
       ;; all numbers are Unicode codepoint in decimal. e.g. (insert-char 182 1)
       '(
@@ -222,7 +215,10 @@
         (newline-mark 10 [172 10]) ; 10 LINE FEED
         (tab-mark 9 [183 9] [92 9]) ; 9 TAB, MIDDLE DOT
         ))
-(global-whitespace-mode 1)
+
+;;(add-hook 'prog-mode-hook 'whitespace-mode)
+(setq whitespace-global-modes '(not org-mode web-mode "Web" emacs-lisp-mode))
+(global-whitespace-mode)
 
 ;; Setting a default line-height
 (setq-default line-spacing 1)
@@ -250,12 +246,6 @@
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
 
-;; Evil stuff
-;; (load "~/.emacs.d/my-evil")
-
-;; Hide the modeline
-(load "~/.emacs.d/hidden-mode-line")
-
 ;; Make CMD work like ALT (on the Mac)
 (setq mac-command-modifier 'meta)
 ;; (setq mac-option-modifier 'none)
@@ -275,10 +265,6 @@
 
 ;; Use frames instead of windows for compilation popups
 ;; (setq-default display-buffer-reuse-frames t)
-
-;; Show line numbers only in opened files
-;; Another option could be: http://www.emacswiki.org/emacs/linum-off.el
-;; (add-hook 'find-file-hook (lambda () (linum-mode 1)))
 
 ;; Format line numbers
 (setq linum-format "%4d ")
@@ -314,10 +300,10 @@
         (mark " " (name 16 -1) " " filename)))
 
 (setq ibuffer-show-empty-filter-groups nil)
-
+;;(add-to-list 'ibuffer-never-show-predicates "TAGS")
+;;(add-to-list 'ibuffer-never-show-predicates "*Backtrace*")
 (add-hook 'ibuffer-mode-hook
           '(lambda ()
-             (ibuffer-auto-mode 1)
              (ibuffer-vc-set-filter-groups-by-vc-root)))
 
 ;; Uniquify buffers
@@ -333,46 +319,9 @@
 (require 'discover)
 (global-discover-mode 1)
 
-;; RVM
-(require 'rvm)
-(rvm-use-default)
-
-;; Cucumber
-(require 'feature-mode)
-(setq feature-use-rvm t)
-(setq feature-cucumber-command "cucumber {options} {feature}")
-(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
-
-;; Rspec
-(require 'rspec-mode)
-(setq rspec-use-rake-when-possible nil)
-
 ;; Scss
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
-
-(defun my-create-non-existent-directory ()
-      (let ((parent-directory (file-name-directory buffer-file-name)))
-        (when (and (not (file-exists-p parent-directory))
-                   (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
-          (make-directory parent-directory t))))
-(add-to-list 'find-file-not-found-functions #'my-create-non-existent-directory)
-
-;; Use bash
-(setq explicit-shell-file-name "/bin/bash")
-(eval-after-load "term"
-  '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
-;; Close the terminal buffer on exit
-(defun oleh-term-exec-hook ()
-  (let* ((buff (current-buffer))
-         (proc (get-buffer-process buff)))
-    (set-process-sentinel
-     proc
-     `(lambda (process event)
-        (if (string= event "finished\n")
-            (kill-buffer ,buff))))))
-
-(add-hook 'term-exec-hook 'oleh-term-exec-hook)
 
 ;; Undo tree
 (require 'undo-tree)
@@ -409,19 +358,9 @@ point reaches the beginning or end of the buffer, stop there."
  (interactive)
   (find-file (expand-file-name "init.el" user-emacs-directory)))
 
-;; all buffers, try to reuse windows across all frames
-(add-to-list 'display-buffer-alist
-           '(".*". (display-buffer-reuse-window .
-                                  ((reusable-frames . t)))))
-
-;; except for compilation buffers where you want new and dedicated frames when necessary
-(add-to-list 'display-buffer-alist
-         '("^\\*Compile-Log\\*". ((display-buffer-reuse-window
-                                   display-buffer-pop-up-frame) .
-                                  ((reusable-frames . t)
-                                   (inhibit-same-window . t)))))
-
 ;; Key bindings
+(global-set-key (kbd "M-z") 'zap-up-to-char)
+
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-word)
 
@@ -435,21 +374,19 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
 (global-unset-key (kbd "C-c C-x"))
 (global-set-key (kbd "C-c C-x") 'execute-extended-command)
-(global-set-key (kbd "C-c C-a") 'ack-and-a-half)
+(global-set-key (kbd "C-c a") 'ag)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "C-x b") 'helm-buffers-list)
+;;(global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
-(global-set-key (kbd "C-=") 'er/expand-region)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
-(global-set-key (kbd "C-c a w") 'ace-jump-word-mode)
-(global-set-key (kbd "C-c a l") 'ace-jump-line-mode)
-(global-set-key (kbd "C-c a c") 'ace-jump-char-mode)
 (global-set-key (kbd "C-c , s") 'rspec-verify-single)
 (global-set-key (kbd "C-c , r") 'rspec-rerun)
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "C-r") 'isearch-backward-regexp)
 (global-set-key (kbd "M-/") 'hippie-expand)
 (global-set-key (kbd "M-<SPC>") 'cycle-spacing)
 (global-set-key [(control ?.)] 'goto-last-change)
@@ -474,13 +411,14 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+    ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
- '(rspec-spec-command "spring rspec")
+ '(rspec-spec-command "rspec")
  '(rspec-use-bundler-when-possible nil)
+ '(rspec-use-rvm t)
  '(rspec-use-spring-when-possible t)
  '(scss-compile-at-save nil))
 (custom-set-faces
@@ -488,6 +426,7 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(compilation-mode-line-fail ((t (:inherit compilation-error :weight bold))))
  '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
  '(diff-removed ((t (:inherit diff-changed :foreground "tomato"))))
  '(ediff-even-diff-C ((t nil)))
@@ -502,6 +441,7 @@ point reaches the beginning or end of the buffer, stop there."
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
  '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
  '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal))))
- '(whitespace-newline ((t (:foreground "#3f3f3f" :weight thin)))))
+ '(whitespace-newline ((t (:foreground "gray31" :weight thin))))
+ '(whitespace-space ((t nil))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

@@ -4,22 +4,10 @@
 (set-face-foreground 'diff-context "#666666")
 (set-face-foreground 'diff-added "#00cc33")
 (set-face-foreground 'diff-removed "#ff0000")
+(setq magit-server-window-for-commit nil)
+(setq magit-emacsclient-executable "/usr/local/bin/emacsclient")
 
 ;; Enable a right limit of 70 chars for git logs
 (add-hook 'magit-log-edit-mode-hook 'turn-on-auto-fill)
-
-;; full screen magit-status
-(defadvice magit-status (around magit-fullscreen activate)
-  (window-configuration-to-register :magit-fullscreen)
-  ad-do-it
-  (delete-other-windows))
-
-(defun magit-quit-session ()
-  "Restores the previous window configuration and kills the magit buffer"
-  (interactive)
-  (kill-buffer)
-  (jump-to-register :magit-fullscreen))
-
-(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
 
 (provide 'my-magit)

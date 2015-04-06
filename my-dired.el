@@ -1,6 +1,7 @@
 ;; I want this for dired-jump
 (require 'dired-x)
 
+;; I usually want to see just the file names
 (require 'dired-details)
 (dired-details-install)
 
@@ -19,7 +20,7 @@
 (setq dired-omit-files "^\\..*$\\|^\\.\\.$")
 (setq dired-omit-mode t)
 
-
+;; List directories first
 (defun sof/dired-sort ()
   "Dired sort hook to list directories first."
   (save-excursion
@@ -32,6 +33,14 @@
   (set-buffer-modified-p nil))
 
 (add-hook 'dired-after-readin-hook 'sof/dired-sort)
+
+;; Automatically create missing directories when creating new files
+(defun my-create-non-existent-directory ()
+      (let ((parent-directory (file-name-directory buffer-file-name)))
+        (when (and (not (file-exists-p parent-directory))
+                   (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
+          (make-directory parent-directory t))))
+(add-to-list 'find-file-not-found-functions #'my-create-non-existent-directory)
 
 ;; Use ls from emacs
 (when (eq system-type 'darwin)
@@ -55,9 +64,6 @@
 
 (define-key dired-mode-map
   (vector 'remap 'end-of-buffer) 'dired-jump-to-bottom)
-
-;; Move files between split panes
-(setq dired-dwim-target t)
 
 ;; C-a is nicer in dired if it moves back to start of files
 (defun dired-back-to-start-of-files ()

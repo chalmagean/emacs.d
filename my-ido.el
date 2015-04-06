@@ -1,21 +1,23 @@
 ;; Ido
-(require 'ido) ;; loading a newer version which fixes flex matching
-(require 'ido-vertical-mode)
+(require 'ido)
 (ido-mode 1)
+
+;; Display results vertically
+(require 'ido-vertical-mode)
 (ido-vertical-mode)
 
 (setq ido-enable-prefix nil
       ido-enable-flex-matching t
-      ido-case-fold nil
-      ido-auto-merge-work-directories-length -1
-      ido-create-new-buffer 'always
-      ido-use-filename-at-point nil
-      ido-max-prospects 10)
+      ido-case-fold t ;; ignore case
+      ido-auto-merge-work-directories-length -1 ;; disable auto-merge (it's confusing)
+      ido-create-new-buffer 'always ;; create new files easily
+      ido-use-filename-at-point nil ;; don't try to be smart about what I want
+      )
 
-;; disable ido faces to see flx highlights.
-(setq ido-use-faces nil)
+;; I like visual matching (colors)
+(setq ido-use-faces t)
 
-
+;; Ido buffer intuitive navigation
 (add-hook 'ido-setup-hook '(lambda ()
                              (define-key ido-completion-map "\C-h" 'ido-delete-backward-updir)
                              (define-key ido-completion-map "\C-n" 'ido-next-match)
