@@ -4,16 +4,19 @@
 (cd "~/")
 
 ;; Using MELPA for packages
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (when (>= emacs-major-version 24)
-    (setq package-archives '(("melpa" . "http://melpa.org/packages/")))))
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+;; (add-to-list 'package-archives
+;;              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
 ;; Load necessary packages
 (package-initialize)
 (setq my-required-packages
       (list 'magit
             'solarized-theme
+            'diminish
+            'column-enforce-mode
             'swiper ;; visual regex search
             'expand-region
             'wrap-region
@@ -76,6 +79,27 @@
 ;; Emacs's version of `tail -f`
 ;; or you can use M-x auto-revert-tail-mode
 (add-to-list 'auto-mode-alist '("\\.log\\'" . auto-revert-mode))
+
+(setq-default mode-line-position
+              '((-3 "%p") (size-indication-mode ("/" (-4 "%I")))
+                " "
+                (line-number-mode
+                 ("%l" (column-number-mode ":%c")))))
+
+(setq-default mode-line-format
+              '("%e" mode-line-front-space
+                ;; Standard info about the current buffer
+                mode-line-mule-info
+                mode-line-client
+                mode-line-modified
+                mode-line-remote
+                mode-line-frame-identification
+                mode-line-buffer-identification " " mode-line-position
+                ;; Misc information, notably battery state and function name
+                " "
+                mode-line-misc-info
+                ;; And the modes, which I don't really care for anyway
+                " " mode-line-modes mode-line-end-spaces))
 
 ;; for smooth scrolling and disabling the automatical recentering of emacs when moving the cursor
 (setq scroll-margin 5
@@ -216,7 +240,7 @@
         (tab-mark 9 [183 9] [92 9]) ; 9 TAB, MIDDLE DOT
         ))
 
-;;(add-hook 'prog-mode-hook 'whitespace-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 (setq whitespace-global-modes '(not org-mode web-mode "Web" emacs-lisp-mode))
 (global-whitespace-mode)
 
@@ -353,6 +377,21 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'prelude-move-beginning-of-line)
 
+;; Hide modes
+(require 'diminish)
+(diminish 'yas-minor-mode)
+(diminish 'undo-tree-mode)
+(diminish 'projectile-mode)
+(diminish 'global-whitespace-mode)
+(diminish 'visual-line-mode)
+(diminish 'anzu-mode)
+(diminish 'eldoc-mode)
+(diminish 'hs-minor-mode)
+(diminish 'yard-mode)
+(diminish 'projectile-rails-mode)
+(diminish 'ruby-refactor-mode)
+(diminish 'ruby-mode)
+
 (defun open-emacs-init-file()
   "Opens the init.el file"
  (interactive)
@@ -363,6 +402,8 @@ point reaches the beginning or end of the buffer, stop there."
 
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-word)
+(global-set-key (kbd "<f3>") 'hs-hide-block)
+(global-set-key (kbd "<f4>") 'hs-show-block)
 
 (global-set-key (kbd "C-c g x") 'git-extract-number-from-branch-name)
 (global-set-key (kbd "C-c g s") 'magit-status)
@@ -377,16 +418,14 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c a") 'ag)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
-;;(global-set-key (kbd "C-x b") 'helm-buffers-list)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+(global-set-key (kbd "M-i") 'helm-imenu)
+(global-set-key (kbd "C-x C-b") 'helm-buffer-list)
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
 (global-set-key (kbd "C-c o") 'vi-open-line-below)
 (global-set-key (kbd "C-c O") 'vi-open-line-above)
 (global-set-key (kbd "C-c , s") 'rspec-verify-single)
 (global-set-key (kbd "C-c , r") 'rspec-rerun)
-(global-set-key (kbd "C-s") 'isearch-forward-regexp)
-(global-set-key (kbd "C-r") 'isearch-backward-regexp)
 (global-set-key (kbd "M-/") 'hippie-expand)
 (global-set-key (kbd "M-<SPC>") 'cycle-spacing)
 (global-set-key [(control ?.)] 'goto-last-change)
@@ -395,14 +434,16 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "<up>") (ignore-error-wrapper 'windmove-up))
 (global-set-key (kbd "<left>") (ignore-error-wrapper 'windmove-left))
 (global-set-key (kbd "<right>") (ignore-error-wrapper 'windmove-right))
+(global-set-key (kbd "S-<down>") 'shrink-window)
+(global-set-key (kbd "S-<up>") 'enlarge-window)
+(global-set-key (kbd "C-S-<up>") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-S-<down>") 'shrink-window-horizontally)
 (define-key isearch-mode-map (kbd "C-<return>") 'isearch-exit-other-end)
 
 ;; Load a personal.el file if it exists
 ;; to be able to override stuff in here
 (if (file-exists-p "~/.emacs.d/personal.el")
-    (load "personal"))
-
-(server-start)
+    (load "~/.emacs.d/personal.el"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -416,11 +457,11 @@ point reaches the beginning or end of the buffer, stop there."
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
+ '(magit-use-overlays nil)
  '(rspec-spec-command "rspec")
- '(rspec-use-bundler-when-possible nil)
  '(rspec-use-rvm t)
- '(rspec-use-spring-when-possible t)
- '(scss-compile-at-save nil))
+ '(scss-compile-at-save nil)
+ '(sentence-end-double-space nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -440,8 +481,6 @@ point reaches the beginning or end of the buffer, stop there."
  '(vertical-border ((((type tty)) (:inherit gray9))))
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
  '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
- '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal))))
- '(whitespace-newline ((t (:foreground "gray31" :weight thin))))
- '(whitespace-space ((t nil))))
+ '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal)))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
