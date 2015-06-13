@@ -15,7 +15,6 @@
 (setq my-required-packages
       (list 'magit
             'solarized-theme
-            'diminish
             'column-enforce-mode
             'swiper ;; visual regex search
             'expand-region
@@ -376,21 +375,6 @@ point reaches the beginning or end of the buffer, stop there."
 
 (global-set-key [remap move-beginning-of-line]
                 'prelude-move-beginning-of-line)
-
-;; Hide modes
-(require 'diminish)
-(diminish 'yas-minor-mode)
-(diminish 'undo-tree-mode)
-(diminish 'projectile-mode)
-(diminish 'global-whitespace-mode)
-(diminish 'visual-line-mode)
-(diminish 'anzu-mode)
-(diminish 'eldoc-mode)
-(diminish 'hs-minor-mode)
-(diminish 'yard-mode)
-(diminish 'projectile-rails-mode)
-(diminish 'ruby-refactor-mode)
-(diminish 'ruby-mode)
 
 (defun open-emacs-init-file()
   "Opens the init.el file"
