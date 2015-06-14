@@ -438,6 +438,7 @@ point reaches the beginning or end of the buffer, stop there."
  '(magit-restore-window-configuration t)
  '(magit-server-window-for-commit nil)
  '(magit-use-overlays nil)
+ '(reb-re-syntax (quote string))
  '(rspec-spec-command "rspec")
  '(rspec-use-rvm t)
  '(scss-compile-at-save nil)
