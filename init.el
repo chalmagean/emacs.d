@@ -239,10 +239,6 @@
         (tab-mark 9 [183 9] [92 9]) ; 9 TAB, MIDDLE DOT
         ))
 
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-(setq whitespace-global-modes '(not org-mode web-mode "Web" emacs-lisp-mode))
-(global-whitespace-mode)
-
 ;; Setting a default line-height
 (setq-default line-spacing 1)
 
