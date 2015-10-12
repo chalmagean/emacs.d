@@ -178,10 +178,7 @@
 ;; Custom themes
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 ;; Choosing a dark theme
-;; (load-theme 'base16-default t)
-;; (load-theme 'tango-dark t)
-;;(load-theme 'wilson t)
-(load-theme 'solarized-dark t)
+(load-theme 'tomorrow-night-paradise t)
 
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
@@ -221,26 +218,18 @@
 ;; Always refresh file contents if they change on disk
 (global-auto-revert-mode 1)
 
-;; Diable bold and underline faces
+;; Disable bold and underline faces
 (when (display-graphic-p)
-  (menu-bar-mode 1)
-  (set-face-attribute 'default nil :foreground "gray" :font "Inconsolata-13" :height 155))
-
-;; ;; Showing whitespace
-(require 'whitespace)
-(setq whitespace-line-column 80) ;; limit line length
-;;(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark lines-tail))
-(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark face lines-tail))
-(setq whitespace-display-mappings
-      ;; all numbers are Unicode codepoint in decimal. e.g. (insert-char 182 1)
-      '(
-        (space-mark nil) ; 32 SPACE, 183 MIDDLE DOT
-        (newline-mark 10 [172 10]) ; 10 LINE FEED
-        (tab-mark 9 [183 9] [92 9]) ; 9 TAB, MIDDLE DOT
-        ))
+  (menu-bar-mode 0)
+  (set-face-attribute 'default nil :foreground "gray" :font "Monaco-13" :weight 'normal))
 
 ;; Setting a default line-height
 (setq-default line-spacing 1)
+
+;; Handle colors in M-x shell
+(load-library "ansi-color")
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 ;; store all backup and autosave files in the tmp dir
 (setq backup-directory-alist
@@ -334,10 +323,6 @@
 ;; Ruby
 (load "~/.emacs.d/my-ruby")
 
-;; Discover mode
-(require 'discover)
-(global-discover-mode 1)
-
 ;; Scss
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
@@ -389,12 +374,10 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c g s") 'magit-status)
 
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
-(global-set-key (kbd "C-x C-5") 'toggle-frame-split)
+
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
 (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
-(global-unset-key (kbd "C-c C-x"))
-(global-set-key (kbd "C-c C-x") 'execute-extended-command)
 (global-set-key (kbd "C-c a") 'ag)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
@@ -432,11 +415,11 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
+    ("4aafea32abe07a9658d20aadcae066e9c7a53f8e3dfbd18d8fa0b26c24f9082c" "4c028a90479b9ad4cbb26ae7dc306dded07718749fe7e4159621a8aebac40213" "51e228ffd6c4fff9b5168b31d5927c27734e82ec61f414970fc6bcce23bc140d" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
+ '(jsx-indent-level 2)
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
- '(magit-server-window-for-commit nil)
  '(magit-use-overlays nil)
  '(reb-re-syntax (quote string))
  '(rspec-spec-command "rspec")
@@ -449,8 +432,6 @@ point reaches the beginning or end of the buffer, stop there."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(compilation-mode-line-fail ((t (:inherit compilation-error :weight bold))))
- '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
- '(diff-removed ((t (:inherit diff-changed :foreground "tomato"))))
  '(ediff-even-diff-C ((t nil)))
  '(ediff-odd-diff-B ((t (:background "dark blue"))))
  '(ediff-odd-diff-C ((t nil)))
@@ -458,8 +439,6 @@ point reaches the beginning or end of the buffer, stop there."
  '(erb-out-delim-face ((t (:foreground "#aaffff"))))
  '(error ((t (:foreground "pink2" :underline nil :weight normal))))
  '(helm-source-header ((t (:background "#22083397778B" :foreground "white"))))
- '(magit-item-highlight ((t nil)))
- '(vertical-border ((((type tty)) (:inherit gray9))))
  '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
  '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
  '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal)))))

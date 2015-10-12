@@ -93,7 +93,6 @@
             (column-enforce-mode 1) ;; Enforce the 80 column rule
             (flyspell-prog-mode) ;; Check strings for spelling errors
             (hs-minor-mode 1) ;; Enables folding
-            (whitespace-mode) ;; Checking for white space and 80 chars limit
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 ;; Start projectile-rails
