@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: table hashes
+# key: ts
+# binding: direct-keybinding
+# --
+table.hashes.each do |row|
+                  $0
+end

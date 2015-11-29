@@ -12,7 +12,7 @@
  ;; '(diff-added ((t (:inherit diff-changed :foreground "#00cc33"))))
  ;; '(diff-removed ((t (:inherit diff-changed :foreground "tomato"))))
  
-(setq magit-completing-read-function 'magit-ido-completing-read)
+;;(setq magit-completing-read-function 'magit-ido-completing-read)
 
 ;; Enable a right limit of 70 chars for git logs
 (add-hook 'magit-log-edit-mode-hook 'turn-on-auto-fill)

@@ -1,10 +1,13 @@
 ;; Files with the following extensions should open in ruby-mode
-(add-to-list 'auto-mode-alist '("\\.rb$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Gemfile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("Rakefile$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.gemspec$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.ru$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("Gemfile$" . enh-ruby-mode))
+
+;; Do not add the encoding comment at the top of every file
+(setq ruby-insert-encoding-magic-comment nil)
 
 (require 'ruby-mode)
 (require 'inf-ruby)
@@ -44,6 +47,7 @@
 ;; Functions to help with refactoring
 (require 'ruby-refactor)
 (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch)
+(add-hook 'enh-ruby-mode-hook 'ruby-refactor-mode-launch)
 ;; Easily toggle ruby's hash syntax
 (require 'ruby-hash-syntax)
 ;; Ruby rdoc helpers mostly
@@ -53,6 +57,7 @@
 ;; Support for YARD
 (require 'yard-mode)
 (add-hook 'ruby-mode-hook 'yard-mode)
+(add-hook 'enh-ruby-mode-hook 'yard-mode)
 ;; Support for running rspec tests
 (require 'rspec-mode)
 
@@ -84,16 +89,27 @@
 ;; Turn on eldoc in ruby files to display info about the
 ;; method or variable at point
 (add-hook 'ruby-mode-hook 'eldoc-mode)
+(add-hook 'enh-ruby-mode-hook 'eldoc-mode)
 ;; Switch the compilation buffer mode with C-x C-q (useful
 ;; when interacting with a debugger)
 (add-hook 'after-init-hook 'inf-ruby-switch-setup)
 
 (add-hook 'ruby-mode-hook
           (lambda ()
-            (column-enforce-mode 1) ;; Enforce the 80 column rule
+            (flycheck-mode 1)
+            (flyspell-prog-mode) ;; Check strings for spelling errors
+            (hs-minor-mode 1) ;; Enables folding
+            (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
+
+(add-hook 'enh-ruby-mode-hook
+          (lambda ()
+            (flycheck-mode 1)
             (flyspell-prog-mode) ;; Check strings for spelling errors
             (hs-minor-mode 1) ;; Enables folding
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 ;; Start projectile-rails
 (add-hook 'projectile-mode-hook 'projectile-rails-on)
+
+(require 'feature-mode)
+(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))

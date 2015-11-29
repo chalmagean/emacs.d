@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: var
+# key: v
+# binding: direct-keybinding
+# --
+var $1 = $0;

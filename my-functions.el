@@ -233,7 +233,7 @@ Assumes that the frame is only split into two."
 (defun git-extract-number-from-branch-name ()
   (interactive)
   (let ((current-branch-name (magit-get-current-branch)))
-    (progn (string-match "\\([0-9]+\\)" current-branch-name)
+    (progn (string-match "\\([0-9A-Za-z]+\\)" current-branch-name)
            (insert (concat "[#" (match-string 1 current-branch-name) "] ")))))
 
 (defun ignore-error-wrapper (fn)

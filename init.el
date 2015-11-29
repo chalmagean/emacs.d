@@ -7,16 +7,18 @@
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-;; (add-to-list 'package-archives
-;;              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
 ;; Load necessary packages
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            'solarized-theme
-            'column-enforce-mode
             'swiper ;; visual regex search
+            'restclient
+            'change-inner
+            'which-key
+            'ledger-mode
+            'helm-ag
+            'jsx-mode
             'expand-region
             'wrap-region
             'exec-path-from-shell
@@ -118,8 +120,7 @@
 
 (require 'iso-transl) ;; Enable accents in GUI
 (require 'goto-chg) ;; Go to last change
-(require 'fullframe)
-(fullframe magit-status magit-mode-quit-window nil)
+
 (require 'slim-mode)
 
 ;; Set fill-column
@@ -130,6 +131,9 @@
 
 ;; No splash screen
 (setq inhibit-startup-screen t)
+
+;; Set the cursor type to a bar
+(setq-default cursor-type 'bar)
 
 ;; Don't warn me when opening large files
 (setq large-file-warning-threshold nil)
@@ -144,6 +148,9 @@
 ;; Instruct Emacs to use emacs term-info not system term info
 ;; http://stackoverflow.com/questions/8918910/weird-character-zsh-in-emacs-terminal
 (setq system-uses-terminfo nil)
+
+;; Disable the warning about undo limits
+;;(add-to-list 'warning-suppress-types '(undo discard-info))
 
 ;; Prefer utf-8 encoding
 (prefer-coding-system 'utf-8)
@@ -165,6 +172,29 @@
 ;; Web mode
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+
+(defadvice web-mode-highlight-part (around tweak-jsx activate)
+  (if (equal web-mode-content-type "jsx")
+      (let ((web-mode-enable-part-face nil))
+        ad-do-it)
+    ad-do-it))
+
+(require 'flycheck)
+(flycheck-define-checker jsxhint-checker
+  "A JSX syntax and style checker based on JSXHint."
+
+  :command ("jsxhint" source)
+  :error-patterns
+  ((error line-start (1+ nonl) ": line " line ", col " column ", " (message) line-end))
+  :modes (web-mode))
+
+(add-hook 'web-mode-hook
+          (lambda ()
+            (when (equal web-mode-content-type "jsx")
+              ;; enable flycheck
+              (flycheck-select-checker 'jsxhint-checker)
+              (flycheck-mode))))
 
 ;; Coffee Script
 (setq coffee-args-compile '("-c" "-m")) ;; generating sourcemap
@@ -176,9 +206,7 @@
 (add-hook 'coffee-after-compile-hook 'my/coffee-after-compile-hook)
 
 ;; Custom themes
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-;; Choosing a dark theme
-(load-theme 'tomorrow-night-paradise t)
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
@@ -218,11 +246,6 @@
 ;; Always refresh file contents if they change on disk
 (global-auto-revert-mode 1)
 
-;; Disable bold and underline faces
-(when (display-graphic-p)
-  (menu-bar-mode 0)
-  (set-face-attribute 'default nil :foreground "gray" :font "Monaco-13" :weight 'normal))
-
 ;; Setting a default line-height
 (setq-default line-spacing 1)
 
@@ -245,6 +268,9 @@
 (setq-default save-place t)
 (setq save-place-file (expand-file-name ".places" user-emacs-directory))
 
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
 ;; Dired
 (load "~/.emacs.d/my-dired")
 
@@ -264,9 +290,9 @@
 (setq ns-use-srgb-colorspace t)
 
 ;; Default frame size
-(setq initial-frame-alist
-      '((top . 10) (left . 50) (width . 185) (height . 55)))
-   
+;; (setq initial-frame-alist
+;;       '((top . 10) (left . 50) (width . 185) (height . 55)))
+
 ;; Making dabbrev a bit nicer
 (setq dabbrev-abbrev-skip-leading-regexp ":")
 (setq dabbrev-backward-only t)
@@ -275,10 +301,7 @@
 ;; (setq-default display-buffer-reuse-frames t)
 
 ;; Format line numbers
-(setq linum-format "%4d ")
-
-;; M-f should move to the beginning of the next word
-(require 'misc)
+(setq linum-format "%4d")
 
 ;; Turn on the left fringe
 (set-fringe-mode '(10 . 0)) ;; 10px left, 0px right
@@ -286,16 +309,16 @@
 ;; Remove the fringe indicators
 (when (boundp 'fringe-indicator-alist)
   (setq-default fringe-indicator-alist
-		'(
-		  (continuation . nil)
-		  (overlay-arrow . nil)
-		  (up . nil)
-		  (down . nil)
-		  (top . nil)
-		  (bottom . nil)
-		  (top-bottom . nil)
-		  (empty-line . nil)
-		  (unknown . nil))))
+                '(
+                  (continuation . nil)
+                  (overlay-arrow . nil)
+                  (up . nil)
+                  (down . nil)
+                  (top . nil)
+                  (bottom . nil)
+                  (top-bottom . nil)
+                  (empty-line . nil)
+                  (unknown . nil))))
 
 ;; Disabling the toolbar
 (tool-bar-mode 0)
@@ -327,9 +350,50 @@
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 
+;; Enable word wrap
+(global-visual-line-mode 1)
+
 ;; Undo tree
 (require 'undo-tree)
 (global-undo-tree-mode 1)
+
+;; Ledger
+(add-to-list 'auto-mode-alist '("\\.ledger\\'" . ledger-mode))
+
+;; Which key
+(which-key-mode 1)
+
+;; first window settings
+(add-to-list 'initial-frame-alist '(tool-bar-lines . 0))
+(add-to-list 'initial-frame-alist '(width . 110))
+(add-to-list 'initial-frame-alist '(height . 60))
+(add-to-list 'initial-frame-alist '(font . "Meslo LG M DZ-13"))
+(add-to-list 'initial-frame-alist '(foreground-color . "dim gray"))
+(add-to-list 'initial-frame-alist '(background-color . "white smoke"))
+
+(add-to-list 'default-frame-alist '(tool-bar-lines . 0))
+(add-to-list 'default-frame-alist '(width . 110))
+(add-to-list 'default-frame-alist '(height . 60))
+(add-to-list 'default-frame-alist '(font . "Meslo LG M DZ-13"))
+(add-to-list 'default-frame-alist '(foreground-color . "dim gray"))
+(add-to-list 'default-frame-alist '(background-color . "white smoke"))
+
+(require 'whitespace)
+(setq whitespace-display-mappings
+   ;; all numbers are Unicode codepoint in decimal. try (insert-char 182 ) to see it
+  '(
+    (space-mark 32 [183] [46]) ; 32 SPACE, 183 MIDDLE DOT 「·」, 46 FULL STOP 「.」
+    (newline-mark 10 [182 10]) ; 10 LINE FEED
+    (tab-mark 9 [187 9] [9655 9] [92 9]) ; 9 TAB, 9655 WHITE RIGHT-POINTING TRIANGLE 「▷」
+    ))
+
+(setq whitespace-style '(face lines-tail))
+
+(add-hook 'prog-mode-hook 'whitespace-mode)
+(add-hook 'ledger-mode-hook
+          (lambda ()
+            (setq show-trailing-whitespace t)
+            whitespace-mode))
 
 (defun prelude-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
@@ -359,14 +423,18 @@ point reaches the beginning or end of the buffer, stop there."
 
 (defun open-emacs-init-file()
   "Opens the init.el file"
- (interactive)
-  (find-file (expand-file-name "init.el" user-emacs-directory)))
+  (interactive)
+  (let (my-buffer-name buffer-name)
+    (select-frame (make-frame))
+    (set-frame-size (selected-frame) 120 50)
+    (find-file (expand-file-name "init.el" user-emacs-directory))))
 
 ;; Key bindings
+
+;; Use C-, instead of C-x
+(define-key global-map (kbd "C-,") ctl-x-map)
 (global-set-key (kbd "M-z") 'zap-up-to-char)
 
-(global-set-key (kbd "M-f") 'forward-to-word)
-(global-set-key (kbd "M-F") 'forward-word)
 (global-set-key (kbd "<f3>") 'hs-hide-block)
 (global-set-key (kbd "<f4>") 'hs-show-block)
 
@@ -374,14 +442,16 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c g s") 'magit-status)
 
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
+(global-set-key (kbd "C-x =") 'balance-windows)
 
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
 (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 (global-set-key (kbd "<f2>") 'open-emacs-init-file)
-(global-set-key (kbd "C-c a") 'ag)
+(global-set-key (kbd "C-c a") 'helm-ag)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
-(global-set-key (kbd "M-i") 'helm-imenu)
+(global-set-key (kbd "M-i") 'change-inner)
+(global-set-key (kbd "M-o") 'change-outer)
 (global-set-key (kbd "C-x C-b") 'helm-buffer-list)
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-c K") 'kill-buffer-and-window)
@@ -391,8 +461,6 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c , r") 'rspec-rerun)
 (global-set-key (kbd "M-/") 'hippie-expand)
 (global-set-key (kbd "M-<SPC>") 'cycle-spacing)
-(global-set-key [(control ?.)] 'goto-last-change)
-(global-set-key [(control ?,)] 'goto-last-change-reverse)
 (global-set-key (kbd "<down>") (ignore-error-wrapper 'windmove-down))
 (global-set-key (kbd "<up>") (ignore-error-wrapper 'windmove-up))
 (global-set-key (kbd "<left>") (ignore-error-wrapper 'windmove-left))
@@ -413,11 +481,10 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("4aafea32abe07a9658d20aadcae066e9c7a53f8e3dfbd18d8fa0b26c24f9082c" "4c028a90479b9ad4cbb26ae7dc306dded07718749fe7e4159621a8aebac40213" "51e228ffd6c4fff9b5168b31d5927c27734e82ec61f414970fc6bcce23bc140d" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "cdc7555f0b34ed32eb510be295b6b967526dd8060e5d04ff0dce719af789f8e5" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "1affe85e8ae2667fb571fc8331e1e12840746dae5c46112d5abb0c3a973f5f5a" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "de2c46ed1752b0d0423cde9b6401062b67a6a1300c068d5d7f67725adc6c3afb" "405fda54905200f202dd2e6ccbf94c1b7cc1312671894bc8eca7e6ec9e8a41a2" "41b6698b5f9ab241ad6c30aea8c9f53d539e23ad4e3963abff4b57c0f8bf6730" "b47a3e837ae97400c43661368be754599ef3b7c33a39fd55da03a6ad489aafee" default)))
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
+ '(flycheck-highlighting-mode nil)
  '(jsx-indent-level 2)
+ '(ledger-highlight-xact-under-point nil)
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-use-overlays nil)
@@ -431,16 +498,7 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(compilation-mode-line-fail ((t (:inherit compilation-error :weight bold))))
- '(ediff-even-diff-C ((t nil)))
- '(ediff-odd-diff-B ((t (:background "dark blue"))))
- '(ediff-odd-diff-C ((t nil)))
- '(erb-face ((t nil)))
- '(erb-out-delim-face ((t (:foreground "#aaffff"))))
- '(error ((t (:foreground "pink2" :underline nil :weight normal))))
- '(helm-source-header ((t (:background "#22083397778B" :foreground "white"))))
- '(web-mode-html-attr-name-face ((t (:foreground "dark gray" :underline nil :weight normal))))
- '(web-mode-html-tag-bracket-face ((t (:foreground "gray58" :underline nil :weight normal))))
- '(web-mode-html-tag-face ((t (:foreground "dark cyan" :underline nil :weight normal)))))
+ '(hl-line ((t (:background "gainsboro"))))
+ '(web-mode-symbol-face ((t (:foreground "indian red")))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

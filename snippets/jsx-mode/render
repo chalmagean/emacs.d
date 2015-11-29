@@ -1,0 +1,10 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: render
+# key: ren
+# binding: direct-keybinding
+# --
+render: function() {
+        return <${1:div}>
+               $0
+               </$1>
+}

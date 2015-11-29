@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: when
+# key: when
+# binding: direct-keybinding
+# --
+When(/^${1:I do something}$/) do
+             $0
+end

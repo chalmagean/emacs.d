@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: className
+# key: cn
+# binding: direct-keybinding
+# --
+className="$0"
