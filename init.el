@@ -12,12 +12,19 @@
 (package-initialize)
 (setq my-required-packages
       (list 'magit
-            'swiper ;; visual regex search
             'restclient
             'change-inner
             'which-key
+            'neotree
+            'jade-mode
+            'alchemist
+            'simpleclip
             'ledger-mode
             'helm-ag
+            'helm-swoop
+            'projectile
+            'helm-projectile
+            'counsel
             'jsx-mode
             'expand-region
             'wrap-region
@@ -33,8 +40,6 @@
             'sourcemap
             'slim-mode
             'bundler
-            'projectile
-            'projectile-rails
             'scss-mode
             'sass-mode
             'f
@@ -102,16 +107,22 @@
                 ;; And the modes, which I don't really care for anyway
                 " " mode-line-modes mode-line-end-spaces))
 
-;; for smooth scrolling and disabling the automatical recentering of emacs when moving the cursor
-(setq scroll-margin 5
-      scroll-preserve-screen-position 1)
-
 ;; Display full path in the window title bar
 (setq-default frame-title-format '((:eval (if (buffer-file-name)
                                               (abbreviate-file-name (buffer-file-name)) "%f"))))
 
 ;; Disable the scroll bar
 (scroll-bar-mode 0)
+
+(defun my-ruby-quotes-toggler ()
+  "Setup mode local bindings to toggle to various ruby quotes"
+  (local-set-key (kbd "C-\"") 'ruby-tools-to-double-quote-string)
+  (local-set-key (kbd "C-'") 'ruby-tools-to-single-quote-string)
+  (local-set-key (kbd "C-:") 'ruby-tools-to-symbol))
+
+;; Disable the menu when running emacs in the terminal
+(unless (display-graphic-p)
+  (menu-bar-mode 0))
 
 (require 'anzu) ;; Shows a count of search matches
 (global-anzu-mode +1)
@@ -122,6 +133,11 @@
 (require 'goto-chg) ;; Go to last change
 
 (require 'slim-mode)
+(add-hook 'slim-mode-hook
+          (lambda ()
+            (whitespace-mode 0)
+            (my-ruby-quotes-toggler)))
+
 
 ;; Set fill-column
 (setq-default fill-column 80)
@@ -129,8 +145,22 @@
 ;; Enable SmartScan
 (smartscan-mode 1)
 
+(defun find-non-ascii-characters ()
+  "It finds the first non-ascii characters from the point forward"
+  (interactive)
+  (re-search-forward "[^[:ascii:]]"))
+
+;; Prettier line between vertical splits
+(set-face-background 'vertical-border "gray")
+(set-face-foreground 'vertical-border (face-background 'vertical-border))
+
 ;; No splash screen
 (setq inhibit-startup-screen t)
+
+;; Simpleclip
+(require 'simpleclip)
+(simpleclip-mode 1)
+
 
 ;; Set the cursor type to a bar
 (setq-default cursor-type 'bar)
@@ -142,7 +172,7 @@
 (setq x-select-enable-clipboard t)
 
 ;; Enable IDO
-(load "~/.emacs.d/my-ido.el")
+;; (load "~/.emacs.d/my-ido.el")
 
 ;; To get rid of Weird color escape sequences in Emacs.
 ;; Instruct Emacs to use emacs term-info not system term info
@@ -173,6 +203,57 @@
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
+
+;; Smart spell check in HTML
+;; http://blog.binchen.org/posts/effective-spell-check-in-emacs.html
+(defun web-mode-flyspell-verify ()
+  (let ((f (get-text-property (- (point) 1) 'face))
+        thing
+        rlt)
+    (cond
+     ((not (memq f '(web-mode-html-attr-value-face
+                     web-mode-html-tag-face
+                     web-mode-html-attr-name-face
+                     web-mode-constant-face
+                     web-mode-doctype-face
+                     web-mode-keyword-face
+                     web-mode-comment-face ;; focus on get html label right
+                     web-mode-function-name-face
+                     web-mode-variable-name-face
+                     web-mode-css-property-name-face
+                     web-mode-css-selector-face
+                     web-mode-css-color-face
+                     web-mode-type-face
+                     web-mode-block-control-face)
+                 ))
+      (setq rlt t))
+     ((memq f '(web-mode-html-attr-value-face))
+      (save-excursion
+        (search-backward-regexp "=['\"]" (line-beginning-position) t)
+        (backward-char)
+        (setq thing (thing-at-point 'symbol))
+        (setq rlt (string-match "^\\(value\\|class\\|ng[A-Za-z0-9-]*\\)$" thing))
+        rlt))
+     (t t))
+    rlt))
+
+(put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify)
+
+;; Modern CSS frameworks like Bootstrap make doublons unavoidable.
+;; For example, CSS class name "btn btn-default" contains double word "btn".
+(defvar flyspell-check-doublon t
+  "Check doublon (double word) when calling `flyspell-highlight-incorrect-region'.")
+ (make-variable-buffer-local 'flyspell-check-doublon)
+
+(defadvice flyspell-highlight-incorrect-region (around flyspell-highlight-incorrect-region-hack activate)
+  (if (or flyspell-check-doublon (not (eq 'doublon (ad-get-arg 2))))
+      ad-do-it))
+
+(defun web-mode-hook-setup ()
+  (flyspell-mode 1)
+  (setq flyspell-check-doublon nil))
+(add-hook 'web-mode-hook 'web-mode-hook-setup)
 
 (defadvice web-mode-highlight-part (around tweak-jsx activate)
   (if (equal web-mode-content-type "jsx")
@@ -181,20 +262,27 @@
     ad-do-it))
 
 (require 'flycheck)
-(flycheck-define-checker jsxhint-checker
-  "A JSX syntax and style checker based on JSXHint."
+;; disable jshint since we prefer eslint checking
+(setq-default flycheck-disabled-checkers
+  (append flycheck-disabled-checkers
+          '(javascript-jshint)))
+;; use eslint with web-mode for jsx files
+(flycheck-add-mode 'javascript-eslint 'web-mode)
+;; customize flycheck temp file prefix
+(setq-default flycheck-temp-prefix ".flycheck")
+;; disable json-jsonlist checking for json files
+(setq-default flycheck-disabled-checkers
+  (append flycheck-disabled-checkers
+          '(json-jsonlist)))
 
-  :command ("jsxhint" source)
-  :error-patterns
-  ((error line-start (1+ nonl) ": line " line ", col " column ", " (message) line-end))
-  :modes (web-mode))
-
-(add-hook 'web-mode-hook
-          (lambda ()
-            (when (equal web-mode-content-type "jsx")
-              ;; enable flycheck
-              (flycheck-select-checker 'jsxhint-checker)
-              (flycheck-mode))))
+;; adjust indents for web-mode to 2 spaces
+(defun my-web-mode-hook ()
+  "Hooks for Web mode. Adjust indents"
+  ;;; http://web-mode.org/
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2))
+(add-hook 'web-mode-hook  'my-web-mode-hook)
 
 ;; Coffee Script
 (setq coffee-args-compile '("-c" "-m")) ;; generating sourcemap
@@ -204,9 +292,16 @@
   (sourcemap-goto-corresponding-point props)
   (delete-file (plist-get props :sourcemap)))
 (add-hook 'coffee-after-compile-hook 'my/coffee-after-compile-hook)
+(add-hook 'coffee-mode-hook
+          (lambda ()
+            (setq show-trailing-whitespace t)))
 
 ;; Custom themes
-;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+;; Load theme
+(load-theme 'wombat)
+; Set cursor color to white
+(set-cursor-color "#ffffff")
 
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
@@ -224,8 +319,6 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 (setq yas-snippet-dirs "~/.emacs.d/snippets")
-;; Disable skeletons in projectile-rails
-(setq projectile-rails-expand-snippet nil)
 
 ;; Always ident with 2 spaces
 (setq-default indent-tabs-mode nil)
@@ -269,7 +362,7 @@
 (setq save-place-file (expand-file-name ".places" user-emacs-directory))
 
 (require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
+(global-set-key (kbd "C-c =") 'er/expand-region)
 
 ;; Dired
 (load "~/.emacs.d/my-dired")
@@ -281,10 +374,20 @@
 (load "~/.emacs.d/my-functions")
 
 ;; Make CMD work like ALT (on the Mac)
-(setq mac-command-modifier 'meta)
+;; (setq mac-command-modifier 'meta)
 ;; (setq mac-option-modifier 'none)
 ;; (setq mac-option-key-is-meta t)
 ;; (setq mac-right-option-modifier nil)
+(setq mac-option-modifier 'meta)
+(setq mac-command-modifier 'super)
+(setq mac-pass-command-to-system nil)
+(global-set-key [(super s)] 'save-buffer)
+;; (global-set-key [(super w)]
+;;                 (lambda () (interactive) (kill-buffer)))
+
+(global-set-key [(super z)] 'undo)
+(global-set-key [(super backspace)]
+                (lambda nil (interactive) (kill-line 0)))
 
 ;; SRGB support
 (setq ns-use-srgb-colorspace t)
@@ -337,6 +440,9 @@
           '(lambda ()
              (ibuffer-vc-set-filter-groups-by-vc-root)))
 
+;; Project explorer
+(require 'neotree)
+
 ;; Uniquify buffers
 (require 'uniquify)
 (setq
@@ -368,15 +474,15 @@
 (add-to-list 'initial-frame-alist '(width . 110))
 (add-to-list 'initial-frame-alist '(height . 60))
 (add-to-list 'initial-frame-alist '(font . "Meslo LG M DZ-13"))
-(add-to-list 'initial-frame-alist '(foreground-color . "dim gray"))
-(add-to-list 'initial-frame-alist '(background-color . "white smoke"))
+;(add-to-list 'initial-frame-alist '(foreground-color . "dim gray"))
+;(add-to-list 'initial-frame-alist '(background-color . "white smoke"))
 
 (add-to-list 'default-frame-alist '(tool-bar-lines . 0))
 (add-to-list 'default-frame-alist '(width . 110))
 (add-to-list 'default-frame-alist '(height . 60))
 (add-to-list 'default-frame-alist '(font . "Meslo LG M DZ-13"))
-(add-to-list 'default-frame-alist '(foreground-color . "dim gray"))
-(add-to-list 'default-frame-alist '(background-color . "white smoke"))
+;(add-to-list 'default-frame-alist '(foreground-color . "dim gray"))
+;(add-to-list 'default-frame-alist '(background-color . "white smoke"))
 
 (require 'whitespace)
 (setq whitespace-display-mappings
@@ -421,7 +527,13 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'prelude-move-beginning-of-line)
 
-(defun open-emacs-init-file()
+(defun open-emacs-init()
+  "Opens the init.el file"
+  (interactive)
+  (let (my-buffer-name buffer-name)
+    (find-file (expand-file-name "init.el" user-emacs-directory))))
+
+(defun open-emacs-init-other-frame()
   "Opens the init.el file"
   (interactive)
   (let (my-buffer-name buffer-name)
@@ -429,11 +541,33 @@ point reaches the beginning or end of the buffer, stop there."
     (set-frame-size (selected-frame) 120 50)
     (find-file (expand-file-name "init.el" user-emacs-directory))))
 
+(setq read-file-name-completion-ignore-case t)
+(setq read-buffer-completion-ignore-case t)
+(mapc (lambda (x)
+        (add-to-list 'completion-ignored-extensions x))
+      '(".aux" ".bbl" ".blg" ".exe"".log" ".meta" ".out" ".pdf"
+        ".synctex.gz" ".tdo" ".toc" "-pkg.el" "-autoloads.el"
+        "Notes.bib" "auto/"))
+
+;; Make helm-buffer show the whole name of each buffer
+(with-eval-after-load 'helm-projectile
+  (setq helm-buffer-max-length nil))
+
 ;; Key bindings
 
 ;; Use C-, instead of C-x
 (define-key global-map (kbd "C-,") ctl-x-map)
 (global-set-key (kbd "M-z") 'zap-up-to-char)
+
+(global-set-key (kbd "C-c h o") 'helm-swoop)
+(global-set-key (kbd "C-c h f") 'helm-projectile-find-file)
+(global-set-key (kbd "C-c h b") 'helm-projectile-switch-to-buffer)
+(global-set-key (kbd "C-c h a") 'helm-projectile-ag)
+(global-set-key (kbd "C-c h B") 'helm-buffers-list)
+(global-set-key (kbd "C-c h x") 'helm-M-x)
+(global-set-key (kbd "C-c h i") 'helm-imenu)
+
+(global-set-key [f8] 'neotree-toggle)
 
 (global-set-key (kbd "<f3>") 'hs-hide-block)
 (global-set-key (kbd "<f4>") 'hs-show-block)
@@ -444,9 +578,15 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-h C-m") 'discover-my-major)
 (global-set-key (kbd "C-x =") 'balance-windows)
 
+(global-set-key (kbd "C-c f") 'find-file-in-project)
+
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
 (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
-(global-set-key (kbd "<f2>") 'open-emacs-init-file)
+
+;; Open the emacs init file
+(global-set-key (kbd "<f2>") 'open-emacs-init)
+(global-set-key (kbd "S-<f2>") 'open-emacs-init-other-frame)
+
 (global-set-key (kbd "C-c a") 'helm-ag)
 (global-set-key (kbd "C-c j") 'dired-jump)
 (global-set-key (kbd "C-c d") 'duplicate-line)
@@ -481,16 +621,24 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(dired-omit-verbose nil)
+ '(enh-ruby-deep-indent-paren nil)
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
  '(flycheck-highlighting-mode nil)
  '(jsx-indent-level 2)
  '(ledger-highlight-xact-under-point nil)
+ '(ledger-reconcile-default-commodity "RON")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
  '(magit-restore-window-configuration t)
  '(magit-use-overlays nil)
+ '(neo-show-updir-line nil)
+ '(neo-smart-open nil)
+ '(neo-theme (quote nerd))
+ '(neo-window-width 40)
  '(reb-re-syntax (quote string))
  '(rspec-spec-command "rspec")
  '(rspec-use-rvm t)
+ '(rspec-use-spring-when-possible nil)
  '(scss-compile-at-save nil)
  '(sentence-end-double-space nil))
 (custom-set-faces
@@ -498,7 +646,11 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(fringe ((t (:background "#242424"))))
  '(hl-line ((t (:background "gainsboro"))))
+ '(ido-subdir ((t (:foreground "dark gray"))))
+ '(neo-banner-face ((t (:foreground "lightblue" :weight normal))))
+ '(neo-root-dir-face ((t (:foreground "lightblue" :weight normal))))
  '(web-mode-symbol-face ((t (:foreground "indian red")))))
 (put 'downcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)

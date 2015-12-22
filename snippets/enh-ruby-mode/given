@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: given
+# key: given
+# binding: direct-keybinding
+# --
+Given(/^$0$/) do
+end

@@ -17,8 +17,9 @@
 (setq auto-revert-verbose nil)
 
 ;; Hide some files
-(setq dired-omit-files "^\\..*$\\|^\\.\\.$")
-(setq dired-omit-mode t)
+;;(setq dired-omit-files "^\\..*$\\|^\\.\\.$")
+(setq dired-omit-files "^\\.pdf$\\|\\.git$\\|\\.DS_Store$")
+(add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
 
 ;; List directories first
 (defun sof/dired-sort ()

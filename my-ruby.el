@@ -40,6 +40,7 @@
 (require 'projectile)
 (projectile-global-mode)
 (setq projectile-completion-system 'grizzl)
+(helm-projectile-on)
 
 ;; Prevent emacs from adding the encoding line at the top of the file
 (setq ruby-insert-encoding-magic-comment nil)
@@ -99,6 +100,7 @@
             (flycheck-mode 1)
             (flyspell-prog-mode) ;; Check strings for spelling errors
             (hs-minor-mode 1) ;; Enables folding
+            (my-ruby-quotes-toggler)
             (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
 
 (add-hook 'enh-ruby-mode-hook
@@ -106,10 +108,9 @@
             (flycheck-mode 1)
             (flyspell-prog-mode) ;; Check strings for spelling errors
             (hs-minor-mode 1) ;; Enables folding
-            (modify-syntax-entry ?: "."))) ;; Adds ":" to the word definition
-
-;; Start projectile-rails
-(add-hook 'projectile-mode-hook 'projectile-rails-on)
+            (modify-syntax-entry ?: ".") ;; Adds ":" to the word definition
+            (my-ruby-quotes-toggler)
+          ))
 
 (require 'feature-mode)
 (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
