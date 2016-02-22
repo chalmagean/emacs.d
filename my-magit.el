@@ -17,5 +17,4 @@
 ;; Enable a right limit of 70 chars for git logs
 (add-hook 'magit-log-edit-mode-hook 'turn-on-auto-fill)
 (setq magit-last-seen-setup-instructions "1.4.0")
-(setq magit-auto-revert-mode nil)
 (provide 'my-magit)

@@ -21,6 +21,7 @@
             'simpleclip
             'ledger-mode
             'helm-ag
+            'helm-descbinds
             'helm-swoop
             'projectile
             'helm-projectile
@@ -137,7 +138,6 @@
           (lambda ()
             (whitespace-mode 0)
             (my-ruby-quotes-toggler)))
-
 
 ;; Set fill-column
 (setq-default fill-column 80)
@@ -303,6 +303,9 @@
 ; Set cursor color to white
 (set-cursor-color "#ffffff")
 
+(add-to-list 'custom-theme-load-path "~/cobalt2-emacs")
+(load-theme 'cobalt2 t)
+
 ;; Always open split windows horizontally
 (setq split-height-threshold 0)
 (setq split-width-threshold nil)
@@ -366,9 +369,6 @@
 
 ;; Dired
 (load "~/.emacs.d/my-dired")
-
-;; Magit
-(load "~/.emacs.d/my-magit")
 
 ;; Custom functions
 (load "~/.emacs.d/my-functions")
@@ -553,6 +553,9 @@ point reaches the beginning or end of the buffer, stop there."
 (with-eval-after-load 'helm-projectile
   (setq helm-buffer-max-length nil))
 
+(require 'helm-descbinds)
+(helm-descbinds-mode)
+
 ;; Key bindings
 
 ;; Use C-, instead of C-x
@@ -565,6 +568,7 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C-c h a") 'helm-projectile-ag)
 (global-set-key (kbd "C-c h B") 'helm-buffers-list)
 (global-set-key (kbd "C-c h x") 'helm-M-x)
+(global-set-key (kbd "C-c h m") 'helm-mini)
 (global-set-key (kbd "C-c h i") 'helm-imenu)
 
 (global-set-key [f8] 'neotree-toggle)
@@ -621,6 +625,9 @@ point reaches the beginning or end of the buffer, stop there."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("a4f8d45297894ffdd98738551505a336a7b3096605b467da83fae00f53b13f01" "af9761c65a81bd14ee3f32bc2ffc966000f57e0c9d31e392bc011504674c07d6" "73abbe794b6467bbf6a9f04867da0befa604a072b38012039e8c1ba730e5f7a5" "cc16715d803b32ae65fa652867551c03e21587b5a5e3450e66c8f1e22dc5e1f5" default)))
  '(dired-omit-verbose nil)
  '(enh-ruby-deep-indent-paren nil)
  '(feature-cucumber-command "bundle exec cucumber {options} {feature}")
@@ -629,6 +636,7 @@ point reaches the beginning or end of the buffer, stop there."
  '(ledger-highlight-xact-under-point nil)
  '(ledger-reconcile-default-commodity "RON")
  '(magit-emacsclient-executable "/usr/local/bin/emacsclient")
+ '(magit-popup-use-prefix-argument (quote default))
  '(magit-restore-window-configuration t)
  '(magit-use-overlays nil)
  '(neo-show-updir-line nil)
